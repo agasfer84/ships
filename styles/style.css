@@ -1,0 +1,42 @@
+html, body{background-color: rgb(249,249,249);color:#000000;}
+
+#top_fraim
+{
+    width:100%;
+    height:300px;
+    border-bottom:1px solid lightgrey;
+}
+
+#log_fraim
+{
+    width:100%;
+    min-height:200px;
+    border-top:1px solid lightgrey;
+}
+
+.inline {display:inline-block;}
+.columns{width:40%; margin:auto; padding:30px;}
+#battle_fraim{background-color: #CCFFFF;}
+#rus_column{border-right:1px solid lightgrey;}
+
+#jap_column{text-align:right;}
+
+ul{list-style-type:none;}
+
+.oval {
+    width: 10px;
+    height: 5px;
+    display: inline-block;
+    margin:0 1px;
+    -moz-border-radius: 100px / 50px;
+    -webkit-border-radius: 100px / 50px;
+    border-radius: 100px / 50px;
+}
+
+.red{background: red;}
+.grey{background: lightgrey;}
+.blue{background: deepskyblue;}
+.green{background: green;}
+
+.p_line{margin:2px; line-height:0.5em;}
+#top_fraim p{line-height:0.5em;}
