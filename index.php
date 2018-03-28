@@ -69,7 +69,10 @@ include $_SERVER['DOCUMENT_ROOT']."/ships.php";
 
         </div>
     </div>
-    <div id="log_fraim"></div>
+    <div id="log_fraim">
+
+        <button onclick="fire()">Огонь</button>
+    </div>
 
 
 </body>

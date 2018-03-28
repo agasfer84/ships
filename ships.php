@@ -23,6 +23,7 @@ class Ships extends Database
             $result["rus_ships"][$key]["fires_line"]=self::fires_line($rus_ship["id"]);
             $result["rus_ships"][$key]["flooding_line"]=self::flooding_line($rus_ship["id"]);
             $result["rus_ships"][$key]["crew_line"]=self::crew_line($rus_ship["id"]);
+            $result["rus_ships"][$key]["enemy_list"]=self::enemyList($rus_ship["id"]);
         }
 
         foreach($jap_ships as $key=>$jap_ship){
@@ -33,6 +34,49 @@ class Ships extends Database
 
         }
 
+        return $result;
+
+    }
+
+    public function fire($target_list)
+    {
+        $result=[];
+      foreach($target_list as $target){
+          $shipid = $target->ship_id;
+          $enemy_id = $target->enemy_id;
+          if($shipid){
+              $cannons =  self::getCannonsByShipId($shipid, $enemy_id);
+              $result[] = $cannons;
+          }
+
+      }
+        $result2=[];
+    for($i = 0; $i < count($result); ++$i) {
+    foreach ($result[$i] as $res)
+    {$result2[] = $res;}
+
+    }
+
+      return $result2;
+
+    }
+
+    public static function enemyList($shipid)
+    {
+        $connection = Database::connection();
+        $query = "SELECT * FROM ships WHERE country='japan'";
+        $ships = $connection->query($query);
+        $ships->setFetchMode(PDO::FETCH_ASSOC);
+
+
+
+        $result = "Цель:&nbsp;<select class='target_list' name='enemy_list' onchange='setTarget(this.options[this.selectedIndex].value, $shipid)'>";
+        $result .="<option value=''>"."Выберите цель..."."</option>";
+        foreach($ships as $key=>$ship){
+            $result .="<option value=".$ship['id'].">".$ship["name"]."</option>";
+        }
+
+        $result .= "</select>";
         return $result;
 
     }
@@ -50,20 +94,23 @@ class Ships extends Database
 
     }
 
-    public static function getCannonsByShipId($shipid) {
+    public static function getCannonsByShipId($shipid, $enemy_id) {
         $ship = self::getShipById($shipid);
         $ship_fires = $ship["fires"];
         $k_fires = (100 - $ship_fires)/100;
 
         $connection = Database::connection();
-        $query = "SELECT * FROM cannons WHERE shipid=$shipid";
+        $query = "SELECT c.*, s.name FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
         $cannons = $connection->query($query);
         $cannons->setFetchMode(PDO::FETCH_ASSOC);
         $result = [];
         foreach($cannons as $key=>$cannon){
            $result[$key]=$cannon;
            $result[$key]["active_quantity"] = ceil((int)$cannon["quantity"]*$k_fires);
-
+           if($enemy_id){
+               $result[$key]["enemy_id"] = $enemy_id;
+               $result[$key]["enemy_name"] = self::getShipById($enemy_id)["name"];
+           }
         }
         return $result;
 

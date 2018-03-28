@@ -2,7 +2,7 @@
 //include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
 include $_SERVER['DOCUMENT_ROOT']."/ships.php";
 
-$shiprequest=$_GET["shiprequest"];
+$shiprequest=$_REQUEST["shiprequest"];
 $shipid=$_GET["shipid"];
 
 if($shiprequest=="shipinit"){
@@ -17,7 +17,7 @@ if($shiprequest=="shipinfo"&&$shipid){
 
     $Ships = new Ships();
     $shipinfo = $Ships->getShipById($shipid);
-    $cannons = $Ships->getCannonsByShipId($shipid);
+    $cannons = $Ships->getCannonsByShipId($shipid, false);
 
     $result=array(
         "shipinfo" => $shipinfo,
@@ -26,6 +26,19 @@ if($shiprequest=="shipinfo"&&$shipid){
 
     header("Content-type: application/json; charset=utf-8");
     echo json_encode($result);
+
+}
+
+if($shiprequest=="fire"){
+
+    $target_list= json_decode($_POST["json_string"], false);
+    $Ships = new Ships();
+    $fire = $Ships->fire($target_list);
+    $result = $fire;
+    header("Content-type: application/json; charset=utf-8");
+    echo json_encode($result);
+    //echo json_encode($_POST);
+    //echo json_encode($_POST["json_string"]);
 
 }
 

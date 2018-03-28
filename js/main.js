@@ -45,19 +45,23 @@ function shipInfo(shipid) {
 }
 
 function shipInit() {
+    this.target_list =[];
     var xmlhttp = new XMLHttpRequest();
 
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
             if (xmlhttp.status == 200) {
                 var data = JSON.parse(xmlhttp.response);
-                console.log(data);
+                //console.log(data);
+                rus_ul.innerHTML="";
+                jap_ul.innerHTML="";
                 var rus_ships = data[0].rus_ships;
                 var jap_ships = data[0].jap_ships;
                 rus_ships.forEach(function(item, i, rus_ships) {
                     var newRusLi = document.createElement('li');
+                    //var newRusSelect = document.createElement('li');
                     newRusLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo("+item.id+");'><p class='ship_name'>"+item.name+"</p></a><img src='/images/'"+item.image+" />"
-                        +item.fires_line+item.flooding_line+item.crew_line;
+                        +item.fires_line+item.flooding_line+item.crew_line+item.enemy_list;
                     rus_ul.appendChild(newRusLi);
                 });
 
@@ -81,5 +85,51 @@ function shipInit() {
     xmlhttp.open("GET", "shipinfo.php?shiprequest=shipinit", true);
     xmlhttp.send();
 }
+
+function setTarget(enemy_id, ship_id)
+{
+    //console.log(enemy_id, ship_id);
+    if(!enemy_id){return alert("Выберите цель!");}
+
+    this.target_list[ship_id]={ship_id:ship_id, enemy_id:enemy_id};
+}
+
+function fire ()
+{
+    console.log(this.target_list);
+
+
+        var xmlhttp = new XMLHttpRequest();
+
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+                if (xmlhttp.status == 200) {
+                    var data = JSON.parse(xmlhttp.response);
+
+                    //var data = xmlhttp.response;
+
+                    console.log(data);
+                    shipInit();
+                }
+                else if (xmlhttp.status == 400) {
+                    alert('There was an error 400');
+                }
+                else {
+                    alert('something else other than 200 was returned');
+                }
+            }
+        };
+
+
+        xmlhttp.open("POST", "shipinfo.php?shiprequest=fire&" + "json_string_get=" + (JSON.stringify(this.target_list)), true);
+        //xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+        xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+
+
+        xmlhttp.send("json_string=" + JSON.stringify(this.target_list));
+
+
+}
+
 
 shipInit();
