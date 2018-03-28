@@ -46,6 +46,7 @@ function shipInfo(shipid) {
 
 function shipInit() {
     this.target_list =[];
+    buttonEnabled();
     var xmlhttp = new XMLHttpRequest();
 
     xmlhttp.onreadystatechange = function() {
@@ -94,7 +95,7 @@ function setTarget(enemy_id, ship_id)
     this.target_list[ship_id]={ship_id:ship_id, enemy_id:enemy_id};
 }
 
-function fire ()
+function fire()
 {
     console.log(this.target_list);
 
@@ -109,6 +110,16 @@ function fire ()
                     //var data = xmlhttp.response;
 
                     console.log(data);
+
+                    log_fraim.innerHTML="";
+
+                    data.forEach(function(item, i, data) {
+                        var newP = document.createElement('p');
+                        newP.innerHTML = item.name+"&nbsp;стреляет по&nbsp;"+item.enemy_name+"&nbsp;орудие&nbsp;"+item.caliber+'"/'+item.barrel_length + '&nbsp;Результат:&nbsp;'+item.fire_result_name;
+                        log_fraim.appendChild(newP);
+                    });
+
+
                     shipInit();
                 }
                 else if (xmlhttp.status == 400) {
@@ -129,7 +140,21 @@ function fire ()
         xmlhttp.send("json_string=" + JSON.stringify(this.target_list));
 
 
+
 }
 
+function  buttonEnabled() {
+    console.log(this.target_list);
+    if(this.target_list.length>0){
+        fire_button.removeAttribute("disabled");
+    }
+    else{
+        fire_button.setAttribute("disabled", "disabled");
+    }
+}
 
-shipInit();
+window.onload = function() {
+    shipInit();
+};
+
+

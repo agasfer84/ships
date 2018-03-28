@@ -52,14 +52,30 @@ class Ships extends Database
       }
         $result2=[];
     for($i = 0; $i < count($result); ++$i) {
-    foreach ($result[$i] as $res)
-    {$result2[] = $res;}
+        foreach ($result[$i] as $res)
+        {$result2[] = $res;}
+    }
+
+        $result3=[];
+    foreach ($result2 as $res2)
+    {
+        for($i = 0; $i < $res2["active_quantity"]; ++$i) {
+            $res2["fire_result_name"] = self::fire_result();
+            $result3[] = $res2;
+
+        }
+    }
+      return $result3;
 
     }
 
-      return $result2;
-
+    public function fire_result()
+    {
+        $result ="Попадание";
+        return $result;
     }
+
+
 
     public static function enemyList($shipid)
     {
@@ -70,8 +86,8 @@ class Ships extends Database
 
 
 
-        $result = "Цель:&nbsp;<select class='target_list' name='enemy_list' onchange='setTarget(this.options[this.selectedIndex].value, $shipid)'>";
-        $result .="<option value=''>"."Выберите цель..."."</option>";
+        $result = "Цель:&nbsp;<select class='target_list' name='enemy_list' onchange='setTarget(this.options[this.selectedIndex].value, $shipid); buttonEnabled()'>";
+        $result .="<option value='' selected disabled>"."Выберите цель..."."</option>";
         foreach($ships as $key=>$ship){
             $result .="<option value=".$ship['id'].">".$ship["name"]."</option>";
         }
