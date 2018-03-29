@@ -16,6 +16,7 @@ function shipInfo(shipid) {
                 ship_crew.innerHTML = 'Экипаж:&nbsp;'+data.shipinfo.crew+'%';
                 ship_belt.innerHTML = 'Главный пояс:&nbsp;'+data.shipinfo.belt;
                 ship_armour_type.innerHTML = 'Тип бронирования:&nbsp;'+data.shipinfo.armour_type;
+                ship_armour_effective.innerHTML = 'Эффективная толщина брони:&nbsp;'+data.shipinfo.effective_armour;
 
                 ship_fires.innerHTML = 'Пожары:&nbsp;'+data.shipinfo.fires+'%';
                 ship_flooding.innerHTML = 'Затопления:&nbsp;'+data.shipinfo.flooding+'%';
@@ -115,7 +116,7 @@ function fire()
 
                     data.forEach(function(item, i, data) {
                         var newP = document.createElement('p');
-                        newP.innerHTML = item.name+"&nbsp;стреляет по&nbsp;"+item.enemy_name+"&nbsp;орудие&nbsp;"+item.caliber+'"/'+item.barrel_length + '&nbsp;Результат:&nbsp;'+item.fire_result_name;
+                        newP.innerHTML = item.name+"&nbsp;стреляет по&nbsp;"+item.enemy_name+"&nbsp;орудие&nbsp;"+item.caliber+'"/'+item.barrel_length + '&nbsp;Результат:&nbsp;'+item.fire_result_name+"-"+item.fire_result_type_name;
                         log_fraim.appendChild(newP);
                     });
 

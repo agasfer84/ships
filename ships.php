@@ -60,8 +60,15 @@ class Ships extends Database
     foreach ($result2 as $res2)
     {
         for($i = 0; $i < $res2["active_quantity"]; ++$i) {
-            $res2["fire_result_name"] = self::fire_result();
-            $result3[] = $res2;
+
+            if(self::fire_chance($res2)){
+                $fire_result = self::fire_result($res2);
+                $res2["fire_result_name"] = $fire_result["fire_result_name"];
+                $res2["fire_result_type_name"] = $fire_result["fire_result_type_name"];
+                $res2["fire_result_type"] = $fire_result["fire_result_type"];
+                self::fire_exec($res2);
+                $result3[] = $res2;
+            }
 
         }
     }
@@ -69,13 +76,62 @@ class Ships extends Database
 
     }
 
-    public function fire_result()
+    public function fire_result($item_fire)
     {
-        $result ="Попадание";
+        $chance_rand = rand(1,100);
+        $precision =90;
+        if($item_fire["country"]=="russia"){$precision=92;}
+        else if($item_fire["country"]=="japan"){$precision=89;}
+
+        if($chance_rand>$precision){
+            $result["fire_result_name"] ="Попадание";
+            $fire_type = self::fire_type();
+            $result["fire_result_type_name"] = $fire_type["fire_result_type_name"];
+            $result["fire_result_type"] = $fire_type["fire_result_type"];
+        }
+        else {
+            $result["fire_result_name"] ="Промах";
+            $result["fire_result_type_name"] = "|";
+        }
+
+
         return $result;
     }
 
+    public function fire_type()
+    {
+        $type_rand = rand(1,100);
 
+        if($type_rand<30){$result["fire_result_type_name"] ="Бортовая броня";$result["fire_result_type"] ="belt";}
+        else {$result["fire_result_type_name"] ="Надстройки";$result["fire_result_type"] ="superstructure";}
+
+        return $result;
+
+    }
+
+    public function fire_exec($item_fire)
+    {
+        $shipid = $item_fire["enemy_id"];
+        if($item_fire["fire_result_type"]=="superstructure")
+       {
+            $connection = Database::connection();
+            $query = "UPDATE ships SET fires=fires+10 WHERE id=$shipid";
+            $result_query = $connection->prepare($query);
+            $result_query->execute();
+       }
+
+    }
+
+    public function fire_chance($item_fire)
+    {
+        $barrel_length_penalty = 1;
+        $caliber_penalty = (2*(int)$item_fire["caliber"])/12;
+        if((int)$item_fire["barrel_length"]<40){$barrel_length_penalty = 2;}
+        $rand = rand(1,10);
+        $chance = 10/($barrel_length_penalty*$caliber_penalty);
+        if($chance>$rand){return true;}
+        else {return false;}
+    }
 
     public static function enemyList($shipid)
     {
@@ -106,6 +162,11 @@ class Ships extends Database
         $ship_flooding = $result["flooding"];
         $k_flooding = (100 - $ship_flooding)/100;
         $result["fact_speed"] = ceil((int)$result["speed"]*$k_flooding);
+
+        $k_armour=1;
+        if($result["armour_type"]=="garvey"){$k_armour=1.2;}
+        if($result["armour_type"]=="krupp"){$k_armour=1.4;}
+        $result["effective_armour"] = $result["belt"]*$k_armour;
         return $result;
 
     }
@@ -116,7 +177,7 @@ class Ships extends Database
         $k_fires = (100 - $ship_fires)/100;
 
         $connection = Database::connection();
-        $query = "SELECT c.*, s.name FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
+        $query = "SELECT c.*, s.name, s.country FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
         $cannons = $connection->query($query);
         $cannons->setFetchMode(PDO::FETCH_ASSOC);
         $result = [];

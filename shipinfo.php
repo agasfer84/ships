@@ -42,4 +42,10 @@ if($shiprequest=="fire"){
 
 }
 
+if($shiprequest=="test"){
+    $Ships = new Ships();
+    /*$test=$Ships->fire_exec($item_fire=1);
+    return $test;*/
+}
+
 
