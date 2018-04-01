@@ -34,18 +34,22 @@ if($shiprequest=="fire"){
     $target_list= json_decode($_POST["json_string"], false);
     $Ships = new Ships();
     $fire = $Ships->fire($target_list);
-    $result = $fire;
+    //$result = $fire;
+    $enemy_fire = $Ships->enemy_fire();
+    $result = array_merge($fire,$enemy_fire);
     header("Content-type: application/json; charset=utf-8");
     echo json_encode($result);
-    //echo json_encode($_POST);
-    //echo json_encode($_POST["json_string"]);
 
 }
 
+
 if($shiprequest=="test"){
-    $Ships = new Ships();
-    /*$test=$Ships->fire_exec($item_fire=1);
-    return $test;*/
+    //http://localhost:8086/shipinfo.php?shiprequest=test
+    //$Ships = new Ships();
+    //$test=$Ships->max_ship_strength();
+    $test=round(0.5);
+    header("Content-type: application/json; charset=utf-8");
+    echo json_encode($test);
 }
 
 

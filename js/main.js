@@ -11,6 +11,7 @@ function shipInfo(shipid) {
                 if (data.shipinfo.country=="russia"){shipinfo_block.style.cssFloat = "left";}
                 if (data.shipinfo.country=="japan"){shipinfo_block.style.cssFloat = "right";}
 
+
                 ship_name.innerHTML = data.shipinfo.name;
                 ship_speed.innerHTML = 'Скорость:&nbsp;'+data.shipinfo.speed+"&nbsp;уз."+"&nbsp;("+"фактическая:&nbsp;"+data.shipinfo.fact_speed+"&nbsp;уз."+")";
                 ship_crew.innerHTML = 'Экипаж:&nbsp;'+data.shipinfo.crew+'%';
@@ -48,6 +49,17 @@ function shipInfo(shipid) {
 function shipInit() {
     this.target_list =[];
     buttonEnabled();
+
+    ship_name.innerHTML ="";
+    ship_speed.innerHTML="";
+    ship_crew.innerHTML ="";
+    ship_belt.innerHTML ="";
+    ship_armour_type.innerHTML ="";
+    ship_armour_effective.innerHTML ="";
+    ship_fires.innerHTML ="";
+    ship_flooding.innerHTML ="";
+    cannons.innerHTML ="";
+
     var xmlhttp = new XMLHttpRequest();
 
     xmlhttp.onreadystatechange = function() {
