@@ -15,8 +15,8 @@ include $_SERVER['DOCUMENT_ROOT']."/ships.php";
 </head>
 <body>
 
-    <div id="top_fraim">
-        <div id="shipinfo_block">
+<div id="top_fraim">
+    <div id="shipinfo_block">
         <p><span id="ship_name" style="font-weight:bold;"></span></p>
         <p><span id="ship_speed"></span></p>
         <p><span id="ship_crew"></span></p>
@@ -27,25 +27,22 @@ include $_SERVER['DOCUMENT_ROOT']."/ships.php";
         <p><span id="ship_armour_effective"></span></p>
 
         <div id="cannons"></div>
-        </div>
     </div>
-    <div id="battle_fraim">
-        <div id="rus_column" class="inline columns">
-            <ul id="rus_ul" class="ships_ul">
-            </ul>
-        </div>
-        <div id="jap_column" class="inline columns">
-
-            <ul id="jap_ul" class="ships_ul">
-            </ul>
-
-        </div>
+</div>
+<div id="battle_fraim">
+    <div id="rus_column" class="inline columns">
+        <ul id="rus_ul" class="ships_ul">
+        </ul>
     </div>
-    <div><button id="fire_button" onclick="fire()" disabled="disabled">Огонь</button></div>
-    <div id="log_fraim">
-
-
+    <div id="log_fraim" class="inline columns">
     </div>
+    <div id="jap_column" class="inline columns">
+        <ul id="jap_ul" class="ships_ul">
+        </ul>
+    </div>
+</div>
+<div><button id="fire_button" onclick="fire()" disabled="disabled">Огонь</button></div>
+
 
 
 </body>

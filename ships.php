@@ -21,11 +21,11 @@ class Ships extends Database
     public function initShips()
     {
         $connection = Database::connection();
-        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN armour a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1";
+        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
         $rus_ships = $connection->query($query_rus);
         $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
 
-        $query_jap = "SELECT s.*, a.* FROM ships s LEFT JOIN armour a on a.shipid = s.id  WHERE s.country='japan' AND s.isactive=1 AND s.inaction=1";
+        $query_jap = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='japan' AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
         $jap_ships = $connection->query($query_jap);
         $jap_ships->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -171,7 +171,7 @@ class Ships extends Database
     public function max_ship_strength()
     {
         $connection = Database::connection();
-        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN armour a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1";
+        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1";
         $rus_ships = $connection->query($query_rus);
         $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -188,7 +188,7 @@ class Ships extends Database
             $result["ship_strength"][$shipid]["shipid"]=$rus_ship["id"];
 
 
-            $query = "SELECT c.*, s.id FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
+            $query = "SELECT c.*, s.id FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
             $cannons = $connection->query($query);
             $cannons->setFetchMode(PDO::FETCH_ASSOC);
             foreach($cannons as $cannon){
@@ -220,11 +220,11 @@ class Ships extends Database
     {
         $chance_rand = rand(1,100);
         $precision =90;
-        if($item_fire["country"]=="russia"){$precision=100-self::RUS_PRECISION;}
-        else if($item_fire["country"]=="japan"){$precision=100-self::JAP_PRECISION;;}
+        if($item_fire["country"]=="russia"){$precision=100-self::RUS_PRECISION; $class="green_text";}
+        else if($item_fire["country"]=="japan"){$precision=100-self::JAP_PRECISION; $class="red_text";}
 
         if($chance_rand>$precision){
-            $result["fire_result_name"] ="Попадание";
+            $result["fire_result_name"] ="<span class='$class'>Попадание</span>";
             $fire_type = self::fire_type();
             $result["fire_result_type_name"] = $fire_type["fire_result_type_name"];
             $result["fire_result_type"] = $fire_type["fire_result_type"];
@@ -292,9 +292,8 @@ class Ships extends Database
 
     public function fire_chance($item_fire)
     {
-        $barrel_length_penalty = 1;
         $caliber_penalty = (2*(int)$item_fire["caliber"])/12;
-        if((int)$item_fire["barrel_length"]<40){$barrel_length_penalty = 2;}
+        $barrel_length_penalty = (50-(int)$item_fire["barrel_length"])/5;
         $rand = rand(1,10);
         $chance = 10/($barrel_length_penalty*$caliber_penalty);
         if($chance>$rand){return true;}
@@ -323,7 +322,7 @@ class Ships extends Database
 
     public static function getShipById($shipid) {
         $connection = Database::connection();
-        $query = "SELECT s.*, a.* FROM ships s INNER JOIN armour a ON s.id=a.shipid WHERE s.id=$shipid";
+        $query = "SELECT s.*, a.* FROM ships s INNER JOIN s_armour2 a ON s.id=a.shipid WHERE s.id=$shipid";
         $result_query = $connection->query($query);
         $result = $result_query->fetch(PDO::FETCH_ASSOC);
 
@@ -345,7 +344,7 @@ class Ships extends Database
         $k_fires = (100 - $ship_fires)/100;
 
         $connection = Database::connection();
-        $query = "SELECT c.*, s.name, s.country FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
+        $query = "SELECT c.*, s.name, s.country FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
         $cannons = $connection->query($query);
         $cannons->setFetchMode(PDO::FETCH_ASSOC);
         $result = [];

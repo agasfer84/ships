@@ -113,44 +113,44 @@ function fire()
     console.log(this.target_list);
 
 
-        var xmlhttp = new XMLHttpRequest();
+    var xmlhttp = new XMLHttpRequest();
 
-        xmlhttp.onreadystatechange = function () {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
-                if (xmlhttp.status == 200) {
-                    var data = JSON.parse(xmlhttp.response);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+            if (xmlhttp.status == 200) {
+                var data = JSON.parse(xmlhttp.response);
 
-                    //var data = xmlhttp.response;
+                //var data = xmlhttp.response;
 
-                    console.log(data);
+                console.log(data);
 
-                    log_fraim.innerHTML="";
+                log_fraim.innerHTML="";
 
-                    data.forEach(function(item, i, data) {
-                        var newP = document.createElement('p');
-                        newP.innerHTML = item.name+"&nbsp;стреляет по&nbsp;"+item.enemy_name+"&nbsp;орудие&nbsp;"+item.caliber+'"/'+item.barrel_length + '&nbsp;Результат:&nbsp;'+item.fire_result_name+"-"+item.fire_result_type_name;
-                        log_fraim.appendChild(newP);
-                    });
+                data.forEach(function(item, i, data) {
+                    var newP = document.createElement('p');
+                    newP.innerHTML = item.name+"&nbsp;стреляет по&nbsp;"+item.enemy_name+"&nbsp;орудие&nbsp;"+item.caliber+'"/'+item.barrel_length + '&nbsp;Результат:&nbsp;'+item.fire_result_name+"-"+item.fire_result_type_name;
+                    log_fraim.appendChild(newP);
+                });
 
 
-                    shipInit();
-                }
-                else if (xmlhttp.status == 400) {
-                    alert('There was an error 400');
-                }
-                else {
-                    alert('something else other than 200 was returned');
-                }
+                shipInit();
             }
-        };
+            else if (xmlhttp.status == 400) {
+                alert('There was an error 400');
+            }
+            else {
+                alert('something else other than 200 was returned');
+            }
+        }
+    };
 
 
-        xmlhttp.open("POST", "shipinfo.php?shiprequest=fire&" + "json_string_get=" + (JSON.stringify(this.target_list)), true);
-        //xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xmlhttp.open("POST", "shipinfo.php?shiprequest=fire&" + "json_string_get=" + (JSON.stringify(this.target_list)), true);
+    //xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 
 
-        xmlhttp.send("json_string=" + JSON.stringify(this.target_list));
+    xmlhttp.send("json_string=" + JSON.stringify(this.target_list));
 
 
 
@@ -169,5 +169,3 @@ function  buttonEnabled() {
 window.onload = function() {
     shipInit();
 };
-
-
