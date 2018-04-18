@@ -41,6 +41,7 @@ class Ships extends Database
             $result["rus_ships"][$key]["flooding_line"]=self::flooding_line($rus_ship["id"]);
             $result["rus_ships"][$key]["crew_line"]=self::crew_line($rus_ship["id"]);
             $result["rus_ships"][$key]["enemy_list"]=self::enemyList($rus_ship["id"]);
+            $result["rus_ships"][$key]["exit_button"]=self::exitButton($rus_ship);
 
 
         }
@@ -58,8 +59,50 @@ class Ships extends Database
 
         }
 
+        $result["jap_ships_speed"] = self::minSpeed("japan");
+        $result["rus_ships_speed"] = self::minSpeed("russia");
+
         return $result;
 
+    }
+
+    public function exitButton($ship)
+    {
+        $disabled = true;
+        $shipid = $ship["id"];
+        if ($ship["country"] == "russia"){$enemy_country = "japan";}
+        else {$enemy_country = "russia";}
+
+        if($ship["speed"]>= self::minSpeed($enemy_country)){$disabled=false;}
+        if($disabled){$result = "<button disabled='disabled'>Выход из боя</button>";}
+        else{$result = "<button onclick='exitShip($shipid)'>Выход из боя</button>";}
+
+        return $result;
+    }
+
+    public function exitShip($shipid)
+    {
+        $connection = Database::connection();
+        $query = "UPDATE ships SET inaction=0 WHERE id=$shipid";
+        $result_query = $connection->prepare($query);
+        $result_query->execute();
+    }
+
+    public function minSpeed($country)
+    {
+        $result = [];
+        if ($country == "russia"){$sql_country = "'"."russia"."'";}
+        else {$sql_country = "'"."japan"."'";}
+            $connection = Database::connection();
+            $query = "SELECT s.* FROM ships s WHERE s.country=$sql_country AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
+            $ships = $connection->query($query);
+            $ships->setFetchMode(PDO::FETCH_ASSOC);
+            foreach($ships as $key=>$ship){
+                $result[$key]=$ship["speed"];
+
+        }
+        $min_speed = min($result);
+        return $min_speed;
     }
 
     public function checkDamage($shipid)

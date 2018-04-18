@@ -31,12 +31,14 @@ include $_SERVER['DOCUMENT_ROOT']."/ships.php";
 </div>
 <div id="battle_fraim">
     <div id="rus_column" class="inline columns">
+        <p id="min_speed_rus"></p>
         <ul id="rus_ul" class="ships_ul">
         </ul>
     </div>
     <div id="log_fraim" class="inline columns">
     </div>
     <div id="jap_column" class="inline columns">
+        <p id="min_speed_jap"></p>
         <ul id="jap_ul" class="ships_ul">
         </ul>
     </div>

@@ -42,6 +42,12 @@ if($shiprequest=="fire"){
 
 }
 
+if($shiprequest=="exitship")
+{
+    $Ships = new Ships();
+    $shipinfo = $Ships->exitShip($shipid);
+}
+
 
 if($shiprequest=="test"){
     //http://localhost:8086/shipinfo.php?shiprequest=test

@@ -69,13 +69,16 @@ function shipInit() {
                 //console.log(data);
                 rus_ul.innerHTML="";
                 jap_ul.innerHTML="";
+                min_speed_rus.innerHTML="Скорость эскадры:&nbsp;"+data[0].rus_ships_speed+"&nbsp;уз.";
+                min_speed_jap.innerHTML="Скорость эскадры:&nbsp;"+data[0].jap_ships_speed+"&nbsp;уз.";
+
                 var rus_ships = data[0].rus_ships;
                 var jap_ships = data[0].jap_ships;
                 rus_ships.forEach(function(item, i, rus_ships) {
                     var newRusLi = document.createElement('li');
                     //var newRusSelect = document.createElement('li');
                     newRusLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo("+item.id+");'><p class='ship_name'>"+item.name+"</p></a><img src='/images/'"+item.image+" />"
-                        +item.fires_line+item.flooding_line+item.crew_line+item.enemy_list;
+                        +item.fires_line+item.flooding_line+item.crew_line+item.enemy_list+item.exit_button;
                     rus_ul.appendChild(newRusLi);
                 });
 
@@ -153,6 +156,30 @@ function fire()
     xmlhttp.send("json_string=" + JSON.stringify(this.target_list));
 
 
+
+}
+
+function exitShip(shipid)
+{
+
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+            if (xmlhttp.status == 200) {
+                shipInit();
+            }
+            else if (xmlhttp.status == 400) {
+                alert('There was an error 400');
+            }
+            else {
+                alert('something else other than 200 was returned');
+            }
+        }
+    };
+
+    xmlhttp.open("GET", "shipinfo.php?shiprequest=exitship&shipid="+shipid, true);
+    xmlhttp.send();
 
 }
 
