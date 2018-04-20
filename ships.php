@@ -98,7 +98,7 @@ class Ships extends Database
             $ships = $connection->query($query);
             $ships->setFetchMode(PDO::FETCH_ASSOC);
             foreach($ships as $key=>$ship){
-                $result[$key]=$ship["speed"];
+                $result[$key]=self::getFactSpeed($ship["speed"], $ship["flooding"]);
 
         }
         $min_speed = min($result);
@@ -263,8 +263,8 @@ class Ships extends Database
     {
         $chance_rand = rand(1,100);
         $precision =90;
-        if($item_fire["country"]=="russia"){$precision=100-self::RUS_PRECISION; $class="green_text";}
-        else if($item_fire["country"]=="japan"){$precision=100-self::JAP_PRECISION; $class="red_text";}
+        if($item_fire["country"]=="russia"){$precision=(100-self::RUS_PRECISION *($item_fire["enemy_ship_length"]/100)); $class="green_text";}
+        else if($item_fire["country"]=="japan"){$precision=(100-self::JAP_PRECISION *($item_fire["enemy_ship_length"]/100)); $class="red_text";}
 
         if($chance_rand>$precision){
             $result["fire_result_name"] ="<span class='$class'>Попадание</span>";
@@ -370,8 +370,8 @@ class Ships extends Database
         $result = $result_query->fetch(PDO::FETCH_ASSOC);
 
         $ship_flooding = $result["flooding"];
-        $k_flooding = (100 - $ship_flooding)/100;
-        $result["fact_speed"] = ceil((int)$result["speed"]*$k_flooding);
+
+        $result["fact_speed"] = self::getFactSpeed($result["speed"], $ship_flooding);
 
         $k_armour=1;
         if($result["armour_type"]=="garvey"){$k_armour=self::GARVEY_ARMOUR;}
@@ -379,6 +379,13 @@ class Ships extends Database
         $result["effective_armour"] = $result["belt"]*$k_armour;
         return $result;
 
+    }
+
+    public function getFactSpeed($speed, $ship_flooding)
+    {
+        $k_flooding = (100 - $ship_flooding)/100;
+        $result = ceil((int)$speed*$k_flooding);
+        return $result;
     }
 
     public static function getCannonsByShipId($shipid, $enemy_id) {
@@ -397,6 +404,7 @@ class Ships extends Database
            if($enemy_id){
                $result[$key]["enemy_id"] = $enemy_id;
                $result[$key]["enemy_name"] = self::getShipById($enemy_id)["name"];
+               $result[$key]["enemy_ship_length"] = self::getShipById($enemy_id)["length"];
            }
         }
         return $result;

@@ -51,9 +51,11 @@ if($shiprequest=="exitship")
 
 if($shiprequest=="test"){
     //http://localhost:8086/shipinfo.php?shiprequest=test
-    //$Ships = new Ships();
-    //$test=$Ships->max_ship_strength();
-    $test=round(0.5);
+    $Ships = new Ships();
+    $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]',false);
+    $test=$Ships->fire($target_list);
+    $test=$Ships->enemy_fire();
+    //$test=round(0.5);
     header("Content-type: application/json; charset=utf-8");
     echo json_encode($test);
 }
