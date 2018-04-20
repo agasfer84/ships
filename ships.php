@@ -6,17 +6,19 @@ include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
 class Ships extends Database
 {
 
-    const RUS_PRECISION=7;
-    const JAP_PRECISION=11;
+    const RUS_PRECISION = 7;
+    const JAP_PRECISION = 11;
 
     const RUS_PIERCING = 1;
-    const JAP_PIERCING = 0.5;
+    const JAP_PIERCING = 0.55;
 
     const RUS_FUGACITY = 0.7;
     const JAP_FUGACITY = 1;
 
     const GARVEY_ARMOUR = 1.2;
     const KRUPP_ARMOUR = 1.4;
+
+    const BELT_CHANCE = 35;
 
     public function initShips()
     {
@@ -285,7 +287,7 @@ class Ships extends Database
     {
         $type_rand = rand(1,100);
 
-        if($type_rand<30){$result["fire_result_type_name"] ="Бортовая броня";$result["fire_result_type"] ="belt";}
+        if($type_rand<self::BELT_CHANCE){$result["fire_result_type_name"] ="Бортовая броня";$result["fire_result_type"] ="belt";}
         else {$result["fire_result_type_name"] ="Надстройки";$result["fire_result_type"] ="superstructure";}
 
         return $result;

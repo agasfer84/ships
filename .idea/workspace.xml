@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5901607a-f13a-457b-9f12-dc728336f326" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/shipinfo.php" afterPath="$PROJECT_DIR$/shipinfo.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ships.php" afterPath="$PROJECT_DIR$/ships.php" />
     </list>
     <ignored path="ships.iws" />
@@ -38,23 +36,23 @@
       <file leaf-file-name="ships.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ships.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="412">
-              <caret line="266" column="123" selection-start-line="266" selection-start-column="123" selection-end-line="266" selection-end-column="123" />
+            <state relative-caret-position="238">
+              <caret line="14" column="29" selection-start-line="14" selection-start-column="29" selection-end-line="14" selection-end-column="29" />
               <folding>
-                <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-                <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-                <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-                <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-                <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-                <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-                <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-                <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-                <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-                <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-                <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-                <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-                <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-                <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+                <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+                <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+                <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+                <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+                <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+                <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+                <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+                <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+                <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+                <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+                <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+                <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+                <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+                <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
               </folding>
             </state>
           </provider>
@@ -354,20 +352,20 @@
         <state relative-caret-position="680">
           <caret line="40" column="20" selection-start-line="40" selection-start-column="20" selection-end-line="40" selection-end-column="20" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
@@ -419,20 +417,20 @@
         <state relative-caret-position="680">
           <caret line="40" column="20" selection-start-line="40" selection-start-column="20" selection-end-line="40" selection-end-column="20" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
@@ -484,20 +482,20 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
@@ -549,20 +547,20 @@
         <state relative-caret-position="544">
           <caret line="32" column="49" selection-start-line="32" selection-start-column="49" selection-end-line="32" selection-end-column="49" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
@@ -614,20 +612,20 @@
         <state relative-caret-position="544">
           <caret line="32" column="49" selection-start-line="32" selection-start-column="49" selection-end-line="32" selection-end-column="49" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
@@ -679,20 +677,20 @@
         <state relative-caret-position="544">
           <caret line="32" column="49" selection-start-line="32" selection-start-column="49" selection-end-line="32" selection-end-column="49" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
@@ -752,20 +750,20 @@
         <state relative-caret-position="510">
           <caret line="30" column="5" selection-start-line="30" selection-start-column="5" selection-end-line="30" selection-end-column="5" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
@@ -874,23 +872,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ships.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="412">
-          <caret line="266" column="123" selection-start-line="266" selection-start-column="123" selection-end-line="266" selection-end-column="123" />
+        <state relative-caret-position="238">
+          <caret line="14" column="29" selection-start-line="14" selection-start-column="29" selection-end-line="14" selection-end-column="29" />
           <folding>
-            <marker date="1524224598701" expanded="true" signature="442:591" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="722:870" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="4222:4259" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="4483:4529" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="5816:5858" ph="SELECT id FR... ships" />
-            <marker date="1524224598701" expanded="true" signature="7425:7554" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="8287:8374" ph="SELECT c.*, s_cannons" />
-            <marker date="1524224598701" expanded="true" signature="11035:11085" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11118:11166" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="11723:11783" ph="UPDATE ships... " />
-            <marker date="1524224598701" expanded="true" signature="12377:12418" ph="SELECT * FRO... ships" />
-            <marker date="1524224598701" expanded="true" signature="12541:12547" ph=" " />
-            <marker date="1524224598701" expanded="true" signature="13082:13162" ph="SELECT s.*, ships" />
-            <marker date="1524224598701" expanded="true" signature="14139:14239" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="476:625" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="756:904" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="4256:4293" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="4517:4563" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="5850:5892" ph="SELECT id FR... ships" />
+            <marker date="1524226298879" expanded="true" signature="7459:7588" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="8321:8408" ph="SELECT c.*, s_cannons" />
+            <marker date="1524226298879" expanded="true" signature="11084:11134" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11167:11215" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="11772:11832" ph="UPDATE ships... " />
+            <marker date="1524226298879" expanded="true" signature="12426:12467" ph="SELECT * FRO... ships" />
+            <marker date="1524226298879" expanded="true" signature="12590:12596" ph=" " />
+            <marker date="1524226298879" expanded="true" signature="13131:13211" ph="SELECT s.*, ships" />
+            <marker date="1524226298879" expanded="true" signature="14188:14288" ph="SELECT c.*, s_cannons" />
           </folding>
         </state>
       </provider>
