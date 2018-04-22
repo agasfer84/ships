@@ -3,7 +3,7 @@ include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
 ?>
 <?php
 
-class Ships extends Database
+class Ships
 {
 
     const RUS_PRECISION = 7;
@@ -20,9 +20,15 @@ class Ships extends Database
 
     const BELT_CHANCE = 35;
 
+    public function __construct()
+    {
+        $db = new Database();
+        $this->db = $db;
+    }
+
     public function initShips()
     {
-        $connection = Database::connection();
+        $connection = $this->db;
         $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
         $rus_ships = $connection->query($query_rus);
         $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
@@ -75,7 +81,7 @@ class Ships extends Database
         if ($ship["country"] == "russia"){$enemy_country = "japan";}
         else {$enemy_country = "russia";}
 
-        if($ship["speed"]>= self::minSpeed($enemy_country)){$disabled=false;}
+        if($ship["speed"]> self::minSpeed($enemy_country)){$disabled=false;}
         if($disabled){$result = "<button disabled='disabled'>Выход из боя</button>";}
         else{$result = "<button onclick='exitShip($shipid)'>Выход из боя</button>";}
 
@@ -84,10 +90,10 @@ class Ships extends Database
 
     public function exitShip($shipid)
     {
-        $connection = Database::connection();
+        $connection = $this->db;
         $query = "UPDATE ships SET inaction=0 WHERE id=$shipid";
         $result_query = $connection->prepare($query);
-        $result_query->execute();
+        return $result_query->execute();
     }
 
     public function minSpeed($country)
@@ -95,7 +101,7 @@ class Ships extends Database
         $result = [];
         if ($country == "russia"){$sql_country = "'"."russia"."'";}
         else {$sql_country = "'"."japan"."'";}
-            $connection = Database::connection();
+            $connection = $this->db;
             $query = "SELECT s.* FROM ships s WHERE s.country=$sql_country AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
             $ships = $connection->query($query);
             $ships->setFetchMode(PDO::FETCH_ASSOC);
@@ -109,7 +115,7 @@ class Ships extends Database
 
     public function checkDamage($shipid)
     {
-        $connection = Database::connection();
+        $connection = $this->db;
         $query = "UPDATE ships SET isactive=0 WHERE id=$shipid";
         $result_query = $connection->prepare($query);
         $result_query->execute();
@@ -117,7 +123,7 @@ class Ships extends Database
 
     public function fireRepare($shipid, $repare)
     {
-        $connection = Database::connection();
+        $connection = $this->db;
         $query = "UPDATE ships SET fires=fires-$repare WHERE id=$shipid";
         $result_query = $connection->prepare($query);
         $result_query->execute();
@@ -130,7 +136,7 @@ class Ships extends Database
           $shipid = $target->ship_id;
           $enemy_id = $target->enemy_id;
           if($shipid){
-              $cannons =  self::getCannonsByShipId($shipid, $enemy_id);
+              $cannons =  $this->getCannonsByShipId($shipid, $enemy_id);
               $result[] = $cannons;
           }
 
@@ -164,7 +170,7 @@ class Ships extends Database
 
     public function enemy_list()
     {
-        $connection = Database::connection();
+        $connection = $this->db;
         $query_jap = "SELECT id FROM ships WHERE country='japan'";
         $jap_ships = $connection->query($query_jap);
         $jap_ships->setFetchMode(PDO::FETCH_ASSOC);
@@ -183,7 +189,7 @@ class Ships extends Database
             $shipid = $target["id"];
             $enemy_id = self::max_ship_strength();
             if($shipid){
-                $cannons =  self::getCannonsByShipId($shipid, $enemy_id);
+                $cannons = $this->getCannonsByShipId($shipid, $enemy_id);
                 $result[] = $cannons;
             }
 
@@ -215,7 +221,7 @@ class Ships extends Database
 
     public function max_ship_strength()
     {
-        $connection = Database::connection();
+        $connection = $this->db;
         $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1";
         $rus_ships = $connection->query($query_rus);
         $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
@@ -297,7 +303,7 @@ class Ships extends Database
     public function fire_exec($item_fire)
     {
         $shipid = $item_fire["enemy_id"];
-        $target_ship = self::getShipById($shipid);
+        $target_ship = $this->getShipById($shipid);
 
         $fugacity = 1;
         $piercing = 1;
@@ -315,7 +321,7 @@ class Ships extends Database
        {
            $fire_level = ceil(($item_fire["caliber"]*25.4*100*$fugacity)/$target_ship["displacement"]);
            $crew_level = ceil($fire_level/2);
-            $connection = Database::connection();
+            $connection = $this->db;
             $query = "UPDATE ships SET fires=fires+$fire_level WHERE id=$shipid";
             $query2 = "UPDATE ships SET crew=crew-$crew_level WHERE id=$shipid";
             $result_query = $connection->prepare($query);
@@ -327,7 +333,7 @@ class Ships extends Database
         {
             $flooding_level = 0;
             if($item_fire["caliber"]*25.4>$target_ship["effective_armour"]){$flooding_level = ceil(pow(($item_fire["caliber"]*25.4*$piercing),2)/$target_ship["displacement"]);}
-            $connection = Database::connection();
+            $connection = $this->db;
             $query = "UPDATE ships SET flooding=flooding+$flooding_level WHERE id=$shipid";
             $result_query = $connection->prepare($query);
             $result_query->execute();
@@ -345,9 +351,9 @@ class Ships extends Database
         else {return false;}
     }
 
-    public static function enemyList($shipid)
+    public function enemyList($shipid)
     {
-        $connection = Database::connection();
+        $connection = $this->db;
         $query = "SELECT * FROM ships WHERE country='japan'";
         $ships = $connection->query($query);
         $ships->setFetchMode(PDO::FETCH_ASSOC);
@@ -365,8 +371,8 @@ class Ships extends Database
 
     }
 
-    public static function getShipById($shipid) {
-        $connection = Database::connection();
+    public function getShipById($shipid) {
+        $connection = $this->db;
         $query = "SELECT s.*, a.* FROM ships s INNER JOIN s_armour2 a ON s.id=a.shipid WHERE s.id=$shipid";
         $result_query = $connection->query($query);
         $result = $result_query->fetch(PDO::FETCH_ASSOC);
@@ -390,12 +396,12 @@ class Ships extends Database
         return $result;
     }
 
-    public static function getCannonsByShipId($shipid, $enemy_id) {
-        $ship = self::getShipById($shipid);
+    public function getCannonsByShipId($shipid, $enemy_id) {
+        $ship = $this->getShipById($shipid);
         $ship_fires = $ship["fires"];
         $k_fires = (100 - $ship_fires)/100;
 
-        $connection = Database::connection();
+        $connection = $this->db;
         $query = "SELECT c.*, s.name, s.country FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
         $cannons = $connection->query($query);
         $cannons->setFetchMode(PDO::FETCH_ASSOC);
@@ -405,8 +411,8 @@ class Ships extends Database
            $result[$key]["active_quantity"] = ceil((int)$cannon["quantity"]*$k_fires);
            if($enemy_id){
                $result[$key]["enemy_id"] = $enemy_id;
-               $result[$key]["enemy_name"] = self::getShipById($enemy_id)["name"];
-               $result[$key]["enemy_ship_length"] = self::getShipById($enemy_id)["length"];
+               $result[$key]["enemy_name"] = $this->getShipById($enemy_id)["name"];
+               $result[$key]["enemy_ship_length"] = $this->getShipById($enemy_id)["length"];
            }
         }
         return $result;
@@ -415,7 +421,7 @@ class Ships extends Database
 
     public function fires_line($shipid)
     {
-        $ship = self::getShipById($shipid);
+        $ship = $this->getShipById($shipid);
 
         $level = ceil($ship["fires"]*5/100);
 
@@ -430,7 +436,7 @@ class Ships extends Database
 
     public function flooding_line($shipid)
     {
-        $ship = self::getShipById($shipid);
+        $ship = $this->getShipById($shipid);
 
         $level = ceil($ship["flooding"]*5/100);
 
@@ -446,7 +452,7 @@ class Ships extends Database
 
     public function crew_line($shipid)
     {
-        $ship = self::getShipById($shipid);
+        $ship = $this->getShipById($shipid);
 
         $level = ceil($ship["crew"]*5/100);
 

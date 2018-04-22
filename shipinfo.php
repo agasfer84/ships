@@ -14,7 +14,6 @@ if($shiprequest=="shipinit"){
 }
 
 if($shiprequest=="shipinfo"&&$shipid){
-
     $Ships = new Ships();
     $shipinfo = $Ships->getShipById($shipid);
     $cannons = $Ships->getCannonsByShipId($shipid, false);
@@ -32,6 +31,7 @@ if($shiprequest=="shipinfo"&&$shipid){
 if($shiprequest=="fire"){
 
     $target_list= json_decode($_POST["json_string"], false);
+
     $Ships = new Ships();
     $fire = $Ships->fire($target_list);
     //$result = $fire;
@@ -51,8 +51,9 @@ if($shiprequest=="exitship")
 
 if($shiprequest=="test"){
     //http://localhost:8086/shipinfo.php?shiprequest=test
-    $Ships = new Ships();
+
     $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]',false);
+    $Ships = new Ships();
     $test=$Ships->fire($target_list);
     $test=$Ships->enemy_fire();
     //$test=round(0.5);
