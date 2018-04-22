@@ -11,9 +11,14 @@ class Database
 
     static public function connection()
     {
-        $dsn = 'mysql:host=localhost;dbname=s_base';
+        /*$dsn = 'mysql:host=localhost;dbname=s_base';
         $username = 'test';
-        $password = 'test';
+        $password = 'test';*/
+
+        $dsn = 'mysql:host=server29.hosting.reg.ru;dbname=u0835050_s_base;charset=utf8';
+        $username = 'u0835050_ships';
+        $password = 'ships@1234';
+
         $table = 'ships';
         $connection = new PDO($dsn, $username, $password, array(
             PDO::ATTR_PERSISTENT => true
