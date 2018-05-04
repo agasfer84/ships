@@ -1,7 +1,3 @@
-<?php
-//include $_SERVER['DOCUMENT_ROOT']."/ships.php";
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,6 +10,14 @@
     <script src="js/main.js"></script>
 </head>
 <body>
+
+<?php
+$switch = "forces";
+
+if($switch =="battle"){
+?>
+
+
 
 <div id="top_fraim">
     <div id="shipinfo_block">
@@ -46,6 +50,18 @@
 <div><button id="fire_button" onclick="fire()" disabled="disabled">Огонь</button></div>
 
 
+
+
+
+<?php
+}
+else if($switch =="forces") {
+?>
+
+<?php }?>
+
+<div id="list_fraim">
+</div>
 
 </body>
 </html>
