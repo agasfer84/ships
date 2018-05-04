@@ -35,7 +35,7 @@ if($shiprequest=="fire"){
     $Ships = new Ships();
     $fire = $Ships->fire($target_list);
     //$result = $fire;
-    $enemy_fire = $Ships->enemy_fire();
+    $enemy_fire = $Ships->ai_fire();
     $result = array_merge($fire,$enemy_fire);
     header("Content-type: application/json; charset=utf-8");
     echo json_encode($result);
@@ -55,7 +55,7 @@ if($shiprequest=="test"){
     $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]',false);
     $Ships = new Ships();
     $test=$Ships->fire($target_list);
-    $test=$Ships->enemy_fire();
+    $test=$Ships->ai_fire();
     //$test=round(0.5);
     header("Content-type: application/json; charset=utf-8");
     echo json_encode($test);

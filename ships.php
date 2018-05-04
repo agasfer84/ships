@@ -26,14 +26,23 @@ class Ships
         $this->db = $db;
     }
 
+    public function getBattleForces()
+    {
+       $result["rus_force_id"] = 12;
+       $result["jap_force_id"] = 21;
+       return $result;
+    }
+
     public function initShips()
     {
         $connection = $this->db;
-        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
+        $rus_force_id = $this->getBattleForces()["rus_force_id"];
+        $jap_force_id = $this->getBattleForces()["jap_force_id"];
+        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1 AND s.force_id=$rus_force_id ORDER BY s.order_id";
         $rus_ships = $connection->query($query_rus);
         $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
 
-        $query_jap = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='japan' AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
+        $query_jap = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='japan' AND s.isactive=1 AND s.inaction=1 AND s.force_id=$jap_force_id ORDER BY s.order_id";
         $jap_ships = $connection->query($query_jap);
         $jap_ships->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -67,8 +76,8 @@ class Ships
 
         }
 
-        $result["jap_ships_speed"] = self::minSpeed("japan");
-        $result["rus_ships_speed"] = self::minSpeed("russia");
+        $result["jap_ships_speed"] = self::minSpeed($jap_force_id);
+        $result["rus_ships_speed"] = self::minSpeed($rus_force_id);
 
         return $result;
 
@@ -78,10 +87,9 @@ class Ships
     {
         $disabled = true;
         $shipid = $ship["id"];
-        if ($ship["country"] == "russia"){$enemy_country = "japan";}
-        else {$enemy_country = "russia";}
+        $force_id= $ship["force_id"];
 
-        if($ship["speed"]> self::minSpeed($enemy_country)){$disabled=false;}
+        if($ship["speed"]> self::minSpeed($force_id)){$disabled=false;}
         if($disabled){$result = "<button disabled='disabled'>Выход из боя</button>";}
         else{$result = "<button onclick='exitShip($shipid)'>Выход из боя</button>";}
 
@@ -96,13 +104,11 @@ class Ships
         return $result_query->execute();
     }
 
-    public function minSpeed($country)
+    public function minSpeed($force_id)
     {
         $result = [];
-        if ($country == "russia"){$sql_country = "'"."russia"."'";}
-        else {$sql_country = "'"."japan"."'";}
             $connection = $this->db;
-            $query = "SELECT s.* FROM ships s WHERE s.country=$sql_country AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
+            $query = "SELECT s.* FROM ships s WHERE s.force_id=$force_id AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
             $ships = $connection->query($query);
             $ships->setFetchMode(PDO::FETCH_ASSOC);
             foreach($ships as $key=>$ship){
@@ -168,10 +174,14 @@ class Ships
 
     }
 
-    public function enemy_list()
+    public function ai_list()
     {
+
+
+        $jap_force_id = $this->getBattleForces()["jap_force_id"];
+
         $connection = $this->db;
-        $query_jap = "SELECT id FROM ships WHERE country='japan'";
+        $query_jap = "SELECT id FROM ships WHERE force_id=$jap_force_id";
         $jap_ships = $connection->query($query_jap);
         $jap_ships->setFetchMode(PDO::FETCH_ASSOC);
         $result=[];
@@ -181,13 +191,14 @@ class Ships
         return $result;
     }
 
-    public function enemy_fire()
+    public function ai_fire()
     {
         $result=[];
-        $target_list = self::enemy_list();
+        $target_list = self::ai_list();
+        $rus_force_id = $this->getBattleForces()["rus_force_id"];
         foreach($target_list as $target){
             $shipid = $target["id"];
-            $enemy_id = self::max_ship_strength();
+            $enemy_id = self::max_ship_strength($rus_force_id);
             if($shipid){
                 $cannons = $this->getCannonsByShipId($shipid, $enemy_id);
                 $result[] = $cannons;
@@ -219,24 +230,24 @@ class Ships
         return $result3;
     }
 
-    public function max_ship_strength()
+    public function max_ship_strength($force_id)
     {
         $connection = $this->db;
-        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1";
-        $rus_ships = $connection->query($query_rus);
-        $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
+        $query = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.force_id=$force_id AND s.isactive=1 AND s.inaction=1";
+        $force_ships = $connection->query($query);
+        $force_ships->setFetchMode(PDO::FETCH_ASSOC);
 
         $result = [];
-        foreach($rus_ships as $key=>$rus_ship){
+        foreach($force_ships as $key=>$force_ship){
             $k_armour=1;
-            if($rus_ship["armour_type"]=="garvey"){$k_armour=self::GARVEY_ARMOUR;}
-            if($rus_ship["armour_type"]=="krupp"){$k_armour=self::KRUPP_ARMOUR;}
-            $rus_ship["effective_armour"] = $rus_ship["belt"]*$k_armour;
+            if($force_ship["armour_type"]=="garvey"){$k_armour=self::GARVEY_ARMOUR;}
+            if($force_ship["armour_type"]=="krupp"){$k_armour=self::KRUPP_ARMOUR;}
+            $force_ship["effective_armour"] = $force_ship["belt"]*$k_armour;
 
-            $shipid=$rus_ship["id"];
+            $shipid=$force_ship["id"];
 
-            $result["ship_strength"][$shipid]["strength"]=(int)$rus_ship["displacement"]+(int)$rus_ship["speed"]*100+(int)$rus_ship["effective_armour"]*10;
-            $result["ship_strength"][$shipid]["shipid"]=$rus_ship["id"];
+            $result["ship_strength"][$shipid]["strength"]=(int)$force_ship["displacement"]+(int)$force_ship["speed"]*100+(int)$force_ship["effective_armour"]*10;
+            $result["ship_strength"][$shipid]["shipid"]=$force_ship["id"];
 
 
             $query = "SELECT c.*, s.id FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=$shipid";
