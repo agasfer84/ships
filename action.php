@@ -1,6 +1,6 @@
 <?php
 //include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
-include $_SERVER['DOCUMENT_ROOT']."/ships.php";
+include $_SERVER['DOCUMENT_ROOT']."/battle.php";
 
 $shiprequest=$_REQUEST["shiprequest"];
 $shipid=$_GET["shipid"];

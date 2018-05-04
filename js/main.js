@@ -42,7 +42,7 @@ function shipInfo(shipid) {
         }
     };
 
-    xmlhttp.open("GET", "shipinfo.php?shiprequest=shipinfo&shipid="+shipid, true);
+    xmlhttp.open("GET", "action.php?shiprequest=shipinfo&shipid="+shipid, true);
     xmlhttp.send();
 }
 
@@ -99,7 +99,7 @@ function shipInit() {
         }
     };
 
-    xmlhttp.open("GET", "shipinfo.php?shiprequest=shipinit", true);
+    xmlhttp.open("GET", "action.php?shiprequest=shipinit", true);
     xmlhttp.send();
 }
 
@@ -148,7 +148,7 @@ function fire()
     };
 
 
-    xmlhttp.open("POST", "shipinfo.php?shiprequest=fire&" + "json_string_get=" + (JSON.stringify(this.target_list)), true);
+    xmlhttp.open("POST", "action.php?shiprequest=fire&" + "json_string_get=" + (JSON.stringify(this.target_list)), true);
     //xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 
@@ -178,7 +178,7 @@ function exitShip(shipid)
         }
     };
 
-    xmlhttp.open("GET", "shipinfo.php?shiprequest=exitship&shipid="+shipid, true);
+    xmlhttp.open("GET", "action.php?shiprequest=exitship&shipid="+shipid, true);
     xmlhttp.send();
 
 }

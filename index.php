@@ -1,5 +1,5 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT']."/ships.php";
+//include $_SERVER['DOCUMENT_ROOT']."/ships.php";
 ?>
 
 <!DOCTYPE html>
