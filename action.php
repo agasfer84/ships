@@ -1,6 +1,7 @@
 <?php
 //include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
 include $_SERVER['DOCUMENT_ROOT']."/battle.php";
+include $_SERVER['DOCUMENT_ROOT']."/forces.php";
 
 $shiprequest=$_REQUEST["shiprequest"];
 $shipid=$_GET["shipid"];
@@ -46,6 +47,14 @@ if($shiprequest=="exitship")
 {
     $Ships = new Ships();
     $shipinfo = $Ships->exitShip($shipid);
+}
+
+if($shiprequest=="shiplist"){
+    $Forces = new Forces();
+    $list_ships=$Forces->getShipList();
+    $result=array($list_ships);
+    header("Content-type: application/json; charset=utf-8");
+    echo json_encode($result);
 }
 
 

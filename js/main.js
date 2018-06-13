@@ -193,6 +193,32 @@ function  buttonEnabled() {
     }
 }
 
+
+function shipList() {
+
+
+    var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+            if (xmlhttp.status == 200) {
+                console.log(data);
+
+            }
+            else if (xmlhttp.status == 400) {
+                alert('There was an error 400');
+            }
+            else {
+                alert('something else other than 200 was returned');
+            }
+        }
+    };
+
+    xmlhttp.open("GET", "action.php?shiprequest=shiplist", true);
+    xmlhttp.send();
+}
+
 window.onload = function() {
     shipInit();
+    shipList();
 };

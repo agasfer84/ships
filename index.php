@@ -58,10 +58,15 @@ if($switch =="battle"){
 else if($switch =="forces") {
 ?>
 
+    <div id="list_fraim">
+    </div>
+    <div id="forces_fraim">
+    </div>
+
+
 <?php }?>
 
-<div id="list_fraim">
-</div>
+
 
 </body>
 </html>
