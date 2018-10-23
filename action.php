@@ -1,73 +1,62 @@
 <?php
 //include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
 include $_SERVER['DOCUMENT_ROOT']."/battle.php";
-include $_SERVER['DOCUMENT_ROOT']."/forces.php";
+//include $_SERVER['DOCUMENT_ROOT']."/forces.php";
 
-$shiprequest=$_REQUEST["shiprequest"];
-$shipid=$_GET["shipid"];
+$_action = $_REQUEST["action"];
+$_id = $_REQUEST["id"];
+$_body = file_get_contents('php://input');
+$result = [];
 
-if($shiprequest=="shipinit"){
+if ($_action == "shipInit") {
     $Ships = new Ships();
-    $init_ships=$Ships->initShips();
-    $result=array($init_ships);
-    header("Content-type: application/json; charset=utf-8");
-    echo json_encode($result);
+    $init_ships = $Ships->initShips();
+    $result = array($init_ships);
 }
 
-if($shiprequest=="shipinfo"&&$shipid){
+if ($_action == "shipInfo" && $_id) {
     $Ships = new Ships();
-    $shipinfo = $Ships->getShipById($shipid);
-    $cannons = $Ships->getCannonsByShipId($shipid, false);
-
-    $result=array(
+    $shipinfo = $Ships->getShipById($_id);
+    $cannons = $Ships->getCannonsByShipId($_id, false);
+    $result = array(
         "shipinfo" => $shipinfo,
         "cannons"=> $cannons
     );
-
-    header("Content-type: application/json; charset=utf-8");
-    echo json_encode($result);
-
 }
 
-if($shiprequest=="fire"){
-
-    $target_list= json_decode($_POST["json_string"], false);
-
+if ($_action == "fire") {
+    $target_list = json_decode($_body , false);
     $Ships = new Ships();
-    $fire = $Ships->fire($target_list);
+    $fire = $Ships->fire($target_list->target_list);
     //$result = $fire;
     $enemy_fire = $Ships->ai_fire();
     $result = array_merge($fire,$enemy_fire);
-    header("Content-type: application/json; charset=utf-8");
-    echo json_encode($result);
-
 }
 
-if($shiprequest=="exitship")
+if ($_action == "exitShip")
 {
     $Ships = new Ships();
-    $shipinfo = $Ships->exitShip($shipid);
+    $shipinfo = $Ships->exitShip($_id);
 }
 
-if($shiprequest=="shiplist"){
+if ($_action == "shipList") {
     $Forces = new Forces();
-    $list_ships=$Forces->getShipList();
-    $result=array($list_ships);
-    header("Content-type: application/json; charset=utf-8");
-    echo json_encode($result);
+    $list_ships = $Forces->getShipList();
+    $result = array($list_ships);
 }
 
 
-if($shiprequest=="test"){
+if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test
-
-    $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]',false);
+    $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
     $Ships = new Ships();
-    $test=$Ships->fire($target_list);
-    $test=$Ships->ai_fire();
-    //$test=round(0.5);
-    header("Content-type: application/json; charset=utf-8");
-    echo json_encode($test);
+    $result = $Ships->fire($target_list);
+    $result = $Ships->ai_fire();
 }
+
+$response = $result;
+
+header("Content-type: application/json; charset=utf-8");
+echo json_encode($response);
 
 

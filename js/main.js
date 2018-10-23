@@ -1,53 +1,56 @@
+"use strict";
+
+var url = "action.php";
+var id = 1;
+var target_list = [];
+
+function promiseRequest(data) {
+    console.log(data);
+
+    return data;
+}
+
+
 function shipInfo(shipid) {
-    var xmlhttp = new XMLHttpRequest();
 
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
-            if (xmlhttp.status == 200) {
-                //document.getElementById("shipInfo").innerHTML = xmlhttp.responseText;
-                //console.log(xmlhttp.response);
-                var data = JSON.parse(xmlhttp.response);
+    var action = "shipInfo";
+    var params = JSON.stringify({});
 
-                if (data.shipinfo.country=="russia"){shipinfo_block.style.cssFloat = "left";}
-                if (data.shipinfo.country=="japan"){shipinfo_block.style.cssFloat = "right";}
+    get(url, action, shipid, params).then(promiseRequest).then(
+        function(data){
+
+            if (data.shipinfo.country=="russia"){shipinfo_block.style.cssFloat = "left";}
+            if (data.shipinfo.country=="japan"){shipinfo_block.style.cssFloat = "right";}
 
 
-                ship_name.innerHTML = data.shipinfo.name;
-                ship_speed.innerHTML = 'Скорость:&nbsp;'+data.shipinfo.speed+"&nbsp;уз."+"&nbsp;("+"фактическая:&nbsp;"+data.shipinfo.fact_speed+"&nbsp;уз."+")";
-                ship_crew.innerHTML = 'Экипаж:&nbsp;'+data.shipinfo.crew+'%';
-                ship_belt.innerHTML = 'Главный пояс:&nbsp;'+data.shipinfo.belt;
-                ship_armour_type.innerHTML = 'Тип бронирования:&nbsp;'+data.shipinfo.armour_type;
-                ship_armour_effective.innerHTML = 'Эффективная толщина брони:&nbsp;'+data.shipinfo.effective_armour;
+            ship_name.innerHTML = data.shipinfo.name;
+            ship_speed.innerHTML = 'Скорость:&nbsp;'+data.shipinfo.speed+"&nbsp;уз."+"&nbsp;("+"фактическая:&nbsp;"+data.shipinfo.fact_speed+"&nbsp;уз."+")";
+            ship_crew.innerHTML = 'Экипаж:&nbsp;'+data.shipinfo.crew+'%';
+            ship_belt.innerHTML = 'Главный пояс:&nbsp;'+data.shipinfo.belt;
+            ship_armour_type.innerHTML = 'Тип бронирования:&nbsp;'+data.shipinfo.armour_type;
+            ship_armour_effective.innerHTML = 'Эффективная толщина брони:&nbsp;'+data.shipinfo.effective_armour;
 
-                ship_fires.innerHTML = 'Пожары:&nbsp;'+data.shipinfo.fires+'%';
-                ship_flooding.innerHTML = 'Затопления:&nbsp;'+data.shipinfo.flooding+'%';
+            ship_fires.innerHTML = 'Пожары:&nbsp;'+data.shipinfo.fires+'%';
+            ship_flooding.innerHTML = 'Затопления:&nbsp;'+data.shipinfo.flooding+'%';
 
-                var cannons_arr = data.cannons;
+            var cannons_arr = data.cannons;
 
-                cannons.innerHTML = "<p>Бортовой залп:</p>";
-                cannons_arr.forEach(function(item, i, cannons_arr) {
-                    var newP = document.createElement('p');
-                    newP.innerHTML = item.caliber+'"'+'/'+item.barrel_length + '-'+item.quantity+"&nbsp;("+"в строю:&nbsp;"+item.active_quantity+")";
-                    cannons.appendChild(newP);
-                });
+            cannons.innerHTML = "<p>Бортовой залп:</p>";
+            cannons_arr.forEach(function(item, i, cannons_arr) {
+                var newP = document.createElement('p');
+                newP.innerHTML = item.caliber+'"'+'/'+item.barrel_length + '-'+item.quantity+"&nbsp;("+"в строю:&nbsp;"+item.active_quantity+")";
+                cannons.appendChild(newP);
+            });
 
-
-            }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
-            }
-            else {
-                alert('something else other than 200 was returned');
-            }
-        }
-    };
-
-    xmlhttp.open("GET", "action.php?shiprequest=shipinfo&shipid="+shipid, true);
-    xmlhttp.send();
+        });
 }
 
 function shipInit() {
-    this.target_list =[];
+
+    var action = "shipInit";
+    var params = JSON.stringify({});
+
+    target_list =[];
     buttonEnabled();
 
     ship_name.innerHTML ="";
@@ -60,132 +63,76 @@ function shipInit() {
     ship_flooding.innerHTML ="";
     cannons.innerHTML ="";
 
-    var xmlhttp = new XMLHttpRequest();
+    get(url, action, id, params).then(promiseRequest).then(
+        function(data){
+            rus_ul.innerHTML="";
+            jap_ul.innerHTML="";
+            min_speed_rus.innerHTML="Скорость эскадры:&nbsp;"+data[0].rus_ships_speed+"&nbsp;уз.";
+            min_speed_jap.innerHTML="Скорость эскадры:&nbsp;"+data[0].jap_ships_speed+"&nbsp;уз.";
 
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
-            if (xmlhttp.status == 200) {
-                var data = JSON.parse(xmlhttp.response);
-                //console.log(data);
-                rus_ul.innerHTML="";
-                jap_ul.innerHTML="";
-                min_speed_rus.innerHTML="Скорость эскадры:&nbsp;"+data[0].rus_ships_speed+"&nbsp;уз.";
-                min_speed_jap.innerHTML="Скорость эскадры:&nbsp;"+data[0].jap_ships_speed+"&nbsp;уз.";
+            var rus_ships = data[0].rus_ships;
+            var jap_ships = data[0].jap_ships;
+            rus_ships.forEach(function(item, i, rus_ships) {
+                var newRusLi = document.createElement('li');
+                //var newRusSelect = document.createElement('li');
+                newRusLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo("+item.id+");'><p class='ship_name'>"+item.name+"</p></a><img src='/images/'"+item.image+" />"
+                    +item.fires_line+item.flooding_line+item.crew_line+item.enemy_list+item.exit_button;
+                rus_ul.appendChild(newRusLi);
+            });
 
-                var rus_ships = data[0].rus_ships;
-                var jap_ships = data[0].jap_ships;
-                rus_ships.forEach(function(item, i, rus_ships) {
-                    var newRusLi = document.createElement('li');
-                    //var newRusSelect = document.createElement('li');
-                    newRusLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo("+item.id+");'><p class='ship_name'>"+item.name+"</p></a><img src='/images/'"+item.image+" />"
-                        +item.fires_line+item.flooding_line+item.crew_line+item.enemy_list+item.exit_button;
-                    rus_ul.appendChild(newRusLi);
-                });
+            jap_ships.forEach(function(item, i, jap_ships) {
+                var newJapLi = document.createElement('li');
+                newJapLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo("+item.id+");'><p class='ship_name'>"+item.name+"</p></a><img src='/images/'"+item.image+" />"
+                    +item.fires_line+item.flooding_line+item.crew_line;
+                jap_ul.appendChild(newJapLi);
+            });
 
-                jap_ships.forEach(function(item, i, jap_ships) {
-                    var newJapLi = document.createElement('li');
-                    newJapLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo("+item.id+");'><p class='ship_name'>"+item.name+"</p></a><img src='/images/'"+item.image+" />"
-                        +item.fires_line+item.flooding_line+item.crew_line;
-                    jap_ul.appendChild(newJapLi);
-                });
-
-            }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
-            }
-            else {
-                alert('something else other than 200 was returned');
-            }
         }
-    };
-
-    xmlhttp.open("GET", "action.php?shiprequest=shipinit", true);
-    xmlhttp.send();
+    );
 }
 
 function setTarget(enemy_id, ship_id)
 {
     //console.log(enemy_id, ship_id);
-    if(!enemy_id){return alert("Выберите цель!");}
+    if (!enemy_id) {
+        return alert("Выберите цель!");
+    }
 
-    this.target_list[ship_id]={ship_id:ship_id, enemy_id:enemy_id};
+    target_list[ship_id] = {ship_id : ship_id, enemy_id : enemy_id};
 }
 
 function fire()
 {
-    console.log(this.target_list);
+    console.log(target_list);
 
+    var action = "fire";
+    var body = JSON.stringify({"target_list" : target_list});
 
-    var xmlhttp = new XMLHttpRequest();
+    post(url, action, body).then(promiseRequest).then(
+        function(data){
+            log_fraim.innerHTML = "";
 
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
-            if (xmlhttp.status == 200) {
-                var data = JSON.parse(xmlhttp.response);
+            data.forEach(function(item, i, data) {
+                var newP = document.createElement('p');
+                newP.innerHTML = item.name+"&nbsp;стреляет по&nbsp;"+item.enemy_name+"&nbsp;орудие&nbsp;"+item.caliber+'"/'+item.barrel_length + '&nbsp;Результат:&nbsp;'+item.fire_result_name+"-"+item.fire_result_type_name;
+                log_fraim.appendChild(newP);
+            });
 
-                //var data = xmlhttp.response;
-
-                console.log(data);
-
-                log_fraim.innerHTML="";
-
-                data.forEach(function(item, i, data) {
-                    var newP = document.createElement('p');
-                    newP.innerHTML = item.name+"&nbsp;стреляет по&nbsp;"+item.enemy_name+"&nbsp;орудие&nbsp;"+item.caliber+'"/'+item.barrel_length + '&nbsp;Результат:&nbsp;'+item.fire_result_name+"-"+item.fire_result_type_name;
-                    log_fraim.appendChild(newP);
-                });
-
-
-                shipInit();
-            }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
-            }
-            else {
-                alert('something else other than 200 was returned');
-            }
-        }
-    };
-
-
-    xmlhttp.open("POST", "action.php?shiprequest=fire&" + "json_string_get=" + (JSON.stringify(this.target_list)), true);
-    //xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-
-
-    xmlhttp.send("json_string=" + JSON.stringify(this.target_list));
-
-
-
+            shipInit();
+        });
 }
 
 function exitShip(shipid)
 {
+    var action = "exitShip";
+    var params = JSON.stringify({});
 
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
-            if (xmlhttp.status == 200) {
-                shipInit();
-            }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
-            }
-            else {
-                alert('something else other than 200 was returned');
-            }
-        }
-    };
-
-    xmlhttp.open("GET", "action.php?shiprequest=exitship&shipid="+shipid, true);
-    xmlhttp.send();
-
+    get(url, action, shipid, params).then(promiseRequest);
 }
 
 function  buttonEnabled() {
-    console.log(this.target_list);
-    if(this.target_list.length>0){
+    console.log(target_list);
+    if(target_list.length>0){
         fire_button.removeAttribute("disabled");
     }
     else{
@@ -195,30 +142,17 @@ function  buttonEnabled() {
 
 
 function shipList() {
+    var action = "shipList";
+    var params = JSON.stringify({});
 
-
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-            if (xmlhttp.status == 200) {
-                console.log(data);
-
-            }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
-            }
-            else {
-                alert('something else other than 200 was returned');
-            }
+    get(url, action, id, params).then(promiseRequest).then(
+        function(data){
+            console.log(data);
         }
-    };
-
-    xmlhttp.open("GET", "action.php?shiprequest=shiplist", true);
-    xmlhttp.send();
+    );
 }
 
 window.onload = function() {
     shipInit();
-    shipList();
+    //shipList();
 };

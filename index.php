@@ -7,12 +7,14 @@
         Ships
     </title>
     <link href="styles/style.css" rel="stylesheet">
+    <script src="js/rest.js"></script>
     <script src="js/main.js"></script>
 </head>
 <body>
 
 <?php
 $switch = "forces";
+$switch = "battle";
 
 if($switch =="battle"){
 ?>

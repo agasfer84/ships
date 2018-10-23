@@ -30,6 +30,7 @@ class Ships
     {
        $result["rus_force_id"] = 12;
        $result["jap_force_id"] = 21;
+
        return $result;
     }
 
@@ -38,60 +39,76 @@ class Ships
         $connection = $this->db;
         $rus_force_id = $this->getBattleForces()["rus_force_id"];
         $jap_force_id = $this->getBattleForces()["jap_force_id"];
-        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1 AND s.force_id=$rus_force_id ORDER BY s.order_id";
-        $rus_ships = $connection->query($query_rus);
-        $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
 
-        $query_jap = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='japan' AND s.isactive=1 AND s.inaction=1 AND s.force_id=$jap_force_id ORDER BY s.order_id";
-        $jap_ships = $connection->query($query_jap);
+        $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1 AND s.force_id=:rus_force_id ORDER BY s.order_id";
+        $rus_ships = $connection->prepare($query_rus);
+        $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
+        $rus_ships->execute(array("rus_force_id" => $rus_force_id));
+
+        $query_jap = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour2 a on a.shipid = s.id  WHERE s.country='japan' AND s.isactive=1 AND s.inaction=1 AND s.force_id=:jap_force_id ORDER BY s.order_id";
+        $jap_ships = $connection->prepare($query_jap);
         $jap_ships->setFetchMode(PDO::FETCH_ASSOC);
+        $jap_ships->execute(array("jap_force_id" => $jap_force_id));
 
         $result = [];
-        foreach($rus_ships as $key=>$rus_ship){
-            if((int)$rus_ship["fires"]>0){
-                $repare = 2*(round((int)$rus_ship["crew"]/100))-1;
+
+        foreach ($rus_ships as $key => $rus_ship) {
+
+            if((int)$rus_ship["fires"] > 0){
+                $repare = 2 * (round((int)$rus_ship["crew"] / 100)) - 1;
                 self::fireRepare($rus_ship["id"], $repare);
             }
-            if(((int)$rus_ship["fires"]>=100) || ((int)$rus_ship["flooding"]>=100)) {self::checkDamage($rus_ship["id"]);}
-            $result["rus_ships"][$key]=$rus_ship;
-            $result["rus_ships"][$key]["fires_line"]=self::fires_line($rus_ship["id"]);
-            $result["rus_ships"][$key]["flooding_line"]=self::flooding_line($rus_ship["id"]);
-            $result["rus_ships"][$key]["crew_line"]=self::crew_line($rus_ship["id"]);
-            $result["rus_ships"][$key]["enemy_list"]=self::enemyList($rus_ship["id"]);
-            $result["rus_ships"][$key]["exit_button"]=self::exitButton($rus_ship);
 
+            if(((int)$rus_ship["fires"] >= 100) || ((int)$rus_ship["flooding"] >= 100)) {
+                self::checkDamage($rus_ship["id"]);
+            }
 
+            $result["rus_ships"][$key] = $rus_ship;
+            $result["rus_ships"][$key]["fires_line"] = self::fires_line($rus_ship["id"]);
+            $result["rus_ships"][$key]["flooding_line"] = self::flooding_line($rus_ship["id"]);
+            $result["rus_ships"][$key]["crew_line"] = self::crew_line($rus_ship["id"]);
+            $result["rus_ships"][$key]["enemy_list"] = self::enemyList($rus_ship["id"]);
+            $result["rus_ships"][$key]["exit_button"] = self::exitButton($rus_ship);
         }
 
-        foreach($jap_ships as $key=>$jap_ship){
-            if((int)$jap_ship["fires"]>0){
-                $repare = 2*(round((int)$jap_ship["crew"]/100))-1;
+        foreach ($jap_ships as $key => $jap_ship) {
+
+            if((int)$jap_ship["fires"] > 0) {
+                $repare = 2 * (round((int)$jap_ship["crew"] / 100)) - 1;
                 self::fireRepare($jap_ship["id"], $repare);
             }
-            if((int)$jap_ship["fires"]>=100 || (int)$jap_ship["flooding"]>=100) {self::checkDamage($jap_ship["id"]);}
-            $result["jap_ships"][$key]=$jap_ship;
-            $result["jap_ships"][$key]["fires_line"]=self::fires_line($jap_ship["id"]);
-            $result["jap_ships"][$key]["flooding_line"]=self::flooding_line($jap_ship["id"]);
-            $result["jap_ships"][$key]["crew_line"]=self::crew_line($jap_ship["id"]);
 
+            if((int)$jap_ship["fires"] >= 100 || (int)$jap_ship["flooding"] >= 100) {
+                self::checkDamage($jap_ship["id"]);
+            }
+
+            $result["jap_ships"][$key] = $jap_ship;
+            $result["jap_ships"][$key]["fires_line"] = self::fires_line($jap_ship["id"]);
+            $result["jap_ships"][$key]["flooding_line"] = self::flooding_line($jap_ship["id"]);
+            $result["jap_ships"][$key]["crew_line"] = self::crew_line($jap_ship["id"]);
         }
 
         $result["jap_ships_speed"] = self::minSpeed($jap_force_id);
         $result["rus_ships_speed"] = self::minSpeed($rus_force_id);
 
         return $result;
-
     }
 
     public function exitButton($ship)
     {
         $disabled = true;
         $shipid = $ship["id"];
-        $force_id= $ship["force_id"];
+        $force_id = $ship["force_id"];
 
-        if($ship["speed"]> self::minSpeed($force_id)){$disabled=false;}
-        if($disabled){$result = "<button disabled='disabled'>Выход из боя</button>";}
-        else{$result = "<button onclick='exitShip($shipid)'>Выход из боя</button>";}
+        if ($ship["speed"] > self::minSpeed($force_id)) {
+            $disabled = false;
+        }
+
+        if ($disabled) {
+            $result = "<button disabled='disabled'>Выход из боя</button>";
+        } else {
+            $result = "<button onclick='exitShip($shipid)'>Выход из боя</button>";
+        }
 
         return $result;
     }
@@ -99,22 +116,25 @@ class Ships
     public function exitShip($shipid)
     {
         $connection = $this->db;
-        $query = "UPDATE ships SET inaction=0 WHERE id=$shipid";
+        $query = "UPDATE ships SET inaction=0 WHERE id=:shipid";
         $result_query = $connection->prepare($query);
-        return $result_query->execute();
+
+        return $result_query->execute(array("shipid" => $shipid));
     }
 
     public function minSpeed($force_id)
     {
         $result = [];
-            $connection = $this->db;
-            $query = "SELECT s.* FROM ships s WHERE s.force_id=$force_id AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
-            $ships = $connection->query($query);
-            $ships->setFetchMode(PDO::FETCH_ASSOC);
-            foreach($ships as $key=>$ship){
-                $result[$key]=self::getFactSpeed($ship["speed"], $ship["flooding"]);
+        $connection = $this->db;
+        $query = "SELECT s.* FROM ships s WHERE s.force_id=:force_id AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
+        $ships = $connection->query($query);
+        $ships->setFetchMode(PDO::FETCH_ASSOC);
+        $ships->execute(array("force_id" => $force_id));
 
+         foreach($ships as $key => $ship){
+                $result[$key] = self::getFactSpeed($ship["speed"], $ship["flooding"]);
         }
+
         $min_speed = min($result);
         return $min_speed;
     }
