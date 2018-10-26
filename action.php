@@ -1,7 +1,7 @@
 <?php
-//include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
-include $_SERVER['DOCUMENT_ROOT']."/battle.php";
-//include $_SERVER['DOCUMENT_ROOT']."/forces.php";
+
+require_once($_SERVER['DOCUMENT_ROOT']."/battle.php");
+require_once($_SERVER['DOCUMENT_ROOT']."/forces.php");
 
 $_action = $_REQUEST["action"];
 $_id = $_REQUEST["id"];
@@ -42,7 +42,7 @@ if ($_action == "exitShip")
 if ($_action == "shipList") {
     $Forces = new Forces();
     $list_ships = $Forces->getShipList();
-    $result = array($list_ships);
+    $result = $list_ships;
 }
 
 

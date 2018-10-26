@@ -1,5 +1,5 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT']."/dbconnect.php";
+require_once($_SERVER['DOCUMENT_ROOT']."/dbconnect.php");
 ?>
 <?php
 
@@ -30,7 +30,7 @@ class Ships
 
     public function getBattleForces()
     {
-       $result["rus_force_id"] = [12, 13];
+       $result["rus_force_id"] = [121, 122, 131];
        $result["jap_force_id"] = [21];
 
        return $result;
@@ -79,7 +79,6 @@ class Ships
             $result["rus_ships"][$key]["crew_line"] = self::crew_line($rus_ship["id"]);
             $result["rus_ships"][$key]["enemy_list"] = self::enemyList($rus_ship["id"], self::getSides()["enemy"]);
             $result["rus_ships"][$key]["exit_button"] = self::exitButton($rus_ship, $jap_force_id);
-            $result["rus_ships"][$key]["misc"] = $rus_force_id;
         }
 
         foreach ($jap_ships as $key => $jap_ship) {

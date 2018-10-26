@@ -47,6 +47,8 @@ function shipInfo(shipid) {
 
 function shipInit() {
 
+    if (!document.getElementById("battle_fraim")) return false;
+
     var action = "shipInit";
     var params = JSON.stringify({});
 
@@ -103,7 +105,7 @@ function setTarget(enemy_id, ship_id)
 
 function fire()
 {
-    console.log(target_list);
+    //console.log(target_list);
 
     var action = "fire";
     var body = JSON.stringify({"target_list" : target_list});
@@ -131,11 +133,12 @@ function exitShip(shipid)
 }
 
 function  buttonEnabled() {
-    console.log(target_list);
-    if(target_list.length>0){
+    //console.log(target_list);
+    if(!document.getElementById("fire_button")) return false;
+
+    if(target_list.length > 0){
         fire_button.removeAttribute("disabled");
-    }
-    else{
+    } else{
         fire_button.setAttribute("disabled", "disabled");
     }
 }
@@ -147,12 +150,21 @@ function shipList() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data){
-            console.log(data);
+            //console.log(data);
+
+            var newUl = document.createElement('ul');
+            list_fraim.appendChild(newUl);
+
+            data.forEach(function(item) {
+                var newLi = document.createElement('li');
+                newLi.innerHTML = item.force_name;
+                newUl.appendChild(newLi);
+            });
         }
     );
 }
 
 window.onload = function() {
     shipInit();
-    //shipList();
+    shipList();
 };

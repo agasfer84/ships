@@ -12,15 +12,6 @@
 </head>
 <body>
 
-<?php
-$switch = "forces";
-$switch = "battle";
-
-if($switch =="battle"){
-?>
-
-
-
 <div id="top_fraim">
     <div id="shipinfo_block">
         <p><span id="ship_name" style="font-weight:bold;"></span></p>
@@ -35,6 +26,15 @@ if($switch =="battle"){
         <div id="cannons"></div>
     </div>
 </div>
+
+<?php
+$switch = "forces";
+//$switch = "battle";
+
+if($switch =="battle"){
+?>
+
+
 <div id="battle_fraim">
     <div id="rus_column" class="inline columns">
         <p id="min_speed_rus"></p>
