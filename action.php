@@ -45,6 +45,12 @@ if ($_action == "shipList") {
     $result = $list_ships;
 }
 
+if ($_action == "forcesList") {
+    $Forces = new Forces();
+    $list_forces = $Forces->getForcesList();
+    $result = $list_forces;
+}
+
 
 if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test

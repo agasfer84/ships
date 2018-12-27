@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<div id="top_fraim">
+<div id="top_frame">
     <div id="shipinfo_block">
         <p><span id="ship_name" style="font-weight:bold;"></span></p>
         <p><span id="ship_speed"></span></p>
@@ -35,13 +35,13 @@ if($switch =="battle"){
 ?>
 
 
-<div id="battle_fraim">
+<div id="battle_frame">
     <div id="rus_column" class="inline columns">
         <p id="min_speed_rus"></p>
         <ul id="rus_ul" class="ships_ul">
         </ul>
     </div>
-    <div id="log_fraim" class="inline columns">
+    <div id="log_frame" class="inline columns">
     </div>
     <div id="jap_column" class="inline columns">
         <p id="min_speed_jap"></p>
@@ -60,9 +60,9 @@ if($switch =="battle"){
 else if($switch =="forces") {
 ?>
 
-    <div id="list_fraim">
+    <div id="list_frame">
     </div>
-    <div id="forces_fraim">
+    <div id="forces_frame">
     </div>
 
 

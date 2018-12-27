@@ -1,13 +1,13 @@
 html, body{background-color: rgb(249,249,249);color:#000000;}
 
-#top_fraim
+#top_frame
 {
     width:100%;
     min-height:350px;
     border-bottom:1px solid lightgrey;
 }
 
-#log_fraim
+#log_frame
 {
     /*width:100%;*/
     width:30%;
@@ -17,11 +17,11 @@ html, body{background-color: rgb(249,249,249);color:#000000;}
     border-right:1px solid lightgrey;
 }
 
-#log_fraim p{font-size:80%;}
+#log_frame p{font-size:80%;}
 
 .inline {display:inline-block;}
 .columns{width:25%; margin:auto; padding:30px;min-height:300px;vertical-align: top;}
-#battle_fraim{background-color: #CCFFFF;}
+#battle_frame{background-color: #CCFFFF;}
 #rus_column{}
 
 #jap_column{text-align:right;}
@@ -44,7 +44,16 @@ ul{list-style-type:none;}
 .green{background: green;}
 
 .p_line{margin:1px; line-height:1em;}
-#top_fraim p{line-height:0.5em;}
+#top_frame p{line-height:0.5em;}
 
 .red_text{color: red;}
 .green_text{color: green;}
+
+#list_frame, #forces_frame {
+    display: inline-block;
+    vertical-align:top;
+}
+
+#forces_frame {
+    float: right;
+}
