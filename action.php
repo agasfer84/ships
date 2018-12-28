@@ -51,6 +51,19 @@ if ($_action == "forcesList") {
     $result = $list_forces;
 }
 
+if ($_action == "shipsToForce") {
+    $ships_list = json_decode($_body , false);
+    $Forces = new Forces();
+    $result = $Forces->setShipsToForce($ships_list);
+}
+
+if ($_action == "createNewForce") {
+    $force_name = json_decode($_body , false);
+    $Forces = new Forces();
+    $result = $Forces->createNewForce($force_name->force_name);
+}
+
+//createNewForce
 
 if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test

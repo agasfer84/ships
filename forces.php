@@ -60,4 +60,15 @@ class Forces
 
     }
 
+    public function setShipsToForce($ships_list) {
+        $connection = $this->db;
+        $force_id = $ships_list->forceId;
+        $shipsToForce = $ships_list->shipsToForce;
+        $ships = implode(",", $shipsToForce);
+
+        $query = "UPDATE ships SET force_id = :force_id WHERE id IN($ships)";
+        $result = $connection->prepare($query);
+        $result->execute(array("force_id" => $force_id));
+    }
+
 }

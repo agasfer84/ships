@@ -4,6 +4,7 @@ var url = "action.php";
 var id = 1;
 var target_list = [];
 var shipsToForce = [];
+var forcesToRegion = [];
 
 function promiseRequest(data) {
     console.log(data);
@@ -11,7 +12,7 @@ function promiseRequest(data) {
     return data;
 }
 
-
+/*battle interface*/
 function shipInfo(shipid) {
 
     var action = "shipInfo";
@@ -146,59 +147,19 @@ function  buttonEnabled() {
     }
 }
 
+/*end battle interface*/
 
-function shipList() {
-    var action = "shipList";
-    var params = JSON.stringify({});
-
-    get(url, action, id, params).then(promiseRequest).then(
-        function(data){
-            //console.log(data);
-
-            var newUl = document.createElement('ul');
-            document.getElementById("list_frame").appendChild(newUl);
-
-            data.forEach(function(force) {
-                var newLi = document.createElement('li');
-                newLi.innerHTML = force.force_name;
-                newUl.appendChild(newLi);
-                var newNestedUl = document.createElement('ul');
-                newLi.appendChild(newNestedUl);
-
-                var force_ships = force.force_ships;
-
-                force_ships.forEach(function(ship) {
-                    var newNestedLi = document.createElement('li');
-                    newNestedLi.innerHTML = ship.name + '<input type="checkbox" name="shipsInForcesCheckboxes" onchange="shipsInForces(this)" value=' + ship.id + '>';
-                    newNestedUl.appendChild(newNestedLi);
-                    }
-                );
-            });
-        }
-    );
-}
-
-function shipsInForces(checkbox) {
-    if (checkbox.checked == true) {
-        shipsToForce.push(checkbox.value);
-    } else {
-        var index = shipsToForce.indexOf(checkbox.value);
-        shipsToForce.shift(index);
-    }
-}
-
-function changeForce() {
-    var forcesSelect = document.getElementById("forcesSelect");
-    console.log(forcesSelect.value);
-}
+ /*forces interface*/
 
 function forcesList() {
     var action = "forcesList";
     var params = JSON.stringify({});
     var list_frame = document.getElementById("list_frame");
+    var forces_frame = document.getElementById("forces_frame");
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data){
+            forces_frame.innerHTML = "";
             var newUl = document.createElement('ul');
             document.getElementById("forces_frame").appendChild(newUl);
 
@@ -214,7 +175,7 @@ function forcesList() {
 
             data.forEach(function(force) {
                 var newLi = document.createElement('li');
-                newLi.innerHTML = force.force_name;
+                newLi.innerHTML = force.force_name + '<input type="checkbox" name="forcesInRegionCheckboxes" onchange="forcesInRegion(this)" value=' + force.id + '>';
                 newUl.appendChild(newLi);
 
                 var newOption = document.createElement('option');
@@ -223,11 +184,104 @@ function forcesList() {
                 forcesSelect.appendChild(newOption);
             });
 
-            });
+            var newForceInput = document.createElement('input');
+            newForceInput.setAttribute("style", "width: 400px;");
+            newForceInput.setAttribute("id", "newForceName");
+            forces_frame.appendChild(newForceInput);
+
+            var newForceButton = document.createElement('button');
+            newForceButton.innerHTML = "Создать отряд";
+            newForceButton.setAttribute("onclick", "createNewForce();");
+            forces_frame.appendChild(newForceButton);
+        });
 }
+
+
+function shipList() {
+
+    if (!document.getElementById("list_frame")) return false;
+
+    var action = "shipList";
+    var params = JSON.stringify({});
+
+    get(url, action, id, params).then(promiseRequest).then(
+        function(data){
+            //console.log(data);
+            document.getElementById("list_frame").innerHTML = "";
+
+            var newUl = document.createElement('ul');
+            document.getElementById("list_frame").appendChild(newUl);
+
+            data.forEach(function(force) {
+                var newLi = document.createElement('li');
+                newLi.innerHTML = force.force_name;
+                newUl.appendChild(newLi);
+                var newNestedUl = document.createElement('ul');
+                newLi.appendChild(newNestedUl);
+
+                var force_ships = force.force_ships;
+
+                force_ships.forEach(function(ship) {
+                    var newNestedLi = document.createElement('li');
+                    newNestedLi.innerHTML = '<a href="javascript:void(0);" onclick="shipInfo(' + ship.id + ');">' + ship.name + '</a>' + '<input type="checkbox" name="shipsInForcesCheckboxes" onchange="shipsInForces(this)" value=' + ship.id + '>';
+                    newNestedUl.appendChild(newNestedLi);
+                    }
+                );
+            });
+
+            forcesList();
+        }
+    );
+}
+
+function createNewForce() {
+    var newForceNameInput = document.getElementById("newForceName");
+
+    if (!newForceNameInput.value) return false;
+
+    //console.log(newForceNameInput.value);
+    var action = "createNewForce";
+    var body = JSON.stringify({"force_name" : newForceNameInput.value});
+
+    post(url, action, body).then(promiseRequest).then( function () {
+        forcesList();
+    });
+}
+
+function forcesInRegion(checkbox) {
+    if (checkbox.checked == true) {
+        forcesToRegion.push(checkbox.value);
+    } else {
+        var index = forcesToRegion.indexOf(checkbox.value);
+        forcesToRegion.shift(index);
+    }
+}
+
+function shipsInForces(checkbox) {
+    if (checkbox.checked == true) {
+        shipsToForce.push(checkbox.value);
+    } else {
+        var index = shipsToForce.indexOf(checkbox.value);
+        shipsToForce.shift(index);
+    }
+}
+
+function changeForce() {
+    var forcesSelect = document.getElementById("forcesSelect");
+    var action = "shipsToForce";
+    var body = JSON.stringify({"forceId" : forcesSelect.value, "shipsToForce" : shipsToForce});
+
+    if (shipsToForce.length < 1) return false;
+
+    post(url, action, body).then(promiseRequest).then( function () {
+            shipList();
+    });
+
+}
+
+/* end forces interface*/
 
 window.onload = function() {
     shipInit();
     shipList();
-    forcesList();
 };
