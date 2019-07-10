@@ -242,17 +242,15 @@ function regionsList() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data){
+            console.log(data);
             var regionsSelect = document.createElement('select');
             regionsSelect.setAttribute("id", "regionsSelect");
             forces_frame.appendChild(regionsSelect);
 
-            var newUl = document.createElement('ul');
-            document.getElementById("forces_frame").appendChild(newUl);
-
-            data.forEach(function(region) {
+            data.forEach(function(item) {
                 var newOption = document.createElement('option');
-                newOption.innerHTML = region.region_name;
-                newOption.value = region.id;
+                newOption.innerHTML = item.region.region_name;
+                newOption.value = item.region.id;
                 regionsSelect.appendChild(newOption);
             });
 
@@ -261,9 +259,28 @@ function regionsList() {
             toRegionButton.setAttribute("onclick", 'sendForcesToRegion();');
             forces_frame.appendChild(toRegionButton);
 
+            populateMap(data);
         });
+}
 
+function populateMap(regions)
+{
+    var top_frame = document.getElementById("top_frame");
 
+    regions.forEach(function(region) {
+        var newRegionDiv = document.createElement('div');
+        newRegionDiv.setAttribute("class", "map_region");
+        newRegionDiv.innerHTML = region.region.region_name;
+        top_frame.appendChild(newRegionDiv);
+
+        var forces = region.forces;
+
+        forces.forEach(function(force){
+            var newRegionForceP = document.createElement('p');
+            newRegionForceP.innerHTML = force.force_name;
+            newRegionDiv.appendChild(newRegionForceP);
+        });
+    });
 }
 
 function createNewForce() {
@@ -286,7 +303,6 @@ function deleteForce(force_id) {
 
     var action = "deleteForce";
     var body = JSON.stringify({"id" : force_id});
-
     var toDel = confirm("Удалить отряд?");
 
     if (toDel) {

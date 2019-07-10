@@ -53,7 +53,7 @@ if ($_action == "forcesList") {
 
 if ($_action == "regionsList") {
     $Forces = new Forces();
-    $list_regions = $Forces->getRegionsList();
+    $list_regions = $Forces->getRegionsWithForcesList();
     $result = $list_regions;
 }
 

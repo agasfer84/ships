@@ -70,6 +70,37 @@ class Forces
         return $regions->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getForcesByRegion($region_id)
+    {
+        $connection = $this->db;
+        $country = $this->getSides()["player"];
+        $query = "SELECT * FROM forces WHERE country=:country AND region_id = :region_id";
+        $forces = $connection->prepare($query);
+        $forces->setFetchMode(PDO::FETCH_ASSOC);
+        $forces->execute(array("country" => $country, "region_id" => $region_id));
+
+        return $forces->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getRegionsWithForcesList()
+    {
+        $connection = $this->db;
+        $query = "SELECT * FROM regions";
+        $regions = $connection->prepare($query);
+        $regions->setFetchMode(PDO::FETCH_ASSOC);
+        $regions->execute();
+
+        $regions_list = $regions->fetchAll(PDO::FETCH_ASSOC);
+        $result = [];
+
+        foreach ($regions_list as $region) {
+            $forces = $this->getForcesByRegion($region["id"]);
+            $result[] = array("region" => $region, "forces" => $forces);
+        }
+
+        return $result;
+    }
+
     public function setShipsToForce($ships_list) {
         $connection = $this->db;
         $force_id = $ships_list->forceId;
