@@ -51,6 +51,12 @@ if ($_action == "forcesList") {
     $result = $list_forces;
 }
 
+if ($_action == "regionsList") {
+    $Forces = new Forces();
+    $list_regions = $Forces->getRegionsList();
+    $result = $list_regions;
+}
+
 if ($_action == "shipsToForce") {
     $ships_list = json_decode($_body , false);
     $Forces = new Forces();
@@ -63,7 +69,17 @@ if ($_action == "createNewForce") {
     $result = $Forces->createNewForce($force_name->force_name);
 }
 
-//createNewForce
+if ($_action == "deleteForce") {
+    $force_id = json_decode($_body , false);
+    $Forces = new Forces();
+    $result = $Forces->deleteForce($force_id->id);
+}
+
+if ($_action == "sendForcesToRegion") {
+    $forcesToRegion = json_decode($_body , false);
+    $Forces = new Forces();
+    $result = $Forces->setRegion($forcesToRegion->forces, $forcesToRegion->region_id);
+}
 
 if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test

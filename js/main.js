@@ -172,10 +172,9 @@ function forcesList() {
             changeForceButton.innerHTML = "Назначить отряд";
             list_frame.appendChild(changeForceButton);
 
-
             data.forEach(function(force) {
                 var newLi = document.createElement('li');
-                newLi.innerHTML = force.force_name + '<input type="checkbox" name="forcesInRegionCheckboxes" onchange="forcesInRegion(this)" value=' + force.id + '>';
+                newLi.innerHTML = force.force_name + '<input type="checkbox" name="forcesInRegionCheckboxes" onchange="forcesInRegion(this)" value=' + force.id + '>' + '<a href="#" onclick="deleteForce(' + force.id + ')">Удалить</a>';
                 newUl.appendChild(newLi);
 
                 var newOption = document.createElement('option');
@@ -230,8 +229,41 @@ function shipList() {
             });
 
             forcesList();
+            regionsList();
         }
     );
+}
+
+function regionsList() {
+    var action = "regionsList";
+    var params = JSON.stringify({});
+
+    var forces_frame = document.getElementById("forces_frame");
+
+    get(url, action, id, params).then(promiseRequest).then(
+        function(data){
+            var regionsSelect = document.createElement('select');
+            regionsSelect.setAttribute("id", "regionsSelect");
+            forces_frame.appendChild(regionsSelect);
+
+            var newUl = document.createElement('ul');
+            document.getElementById("forces_frame").appendChild(newUl);
+
+            data.forEach(function(region) {
+                var newOption = document.createElement('option');
+                newOption.innerHTML = region.region_name;
+                newOption.value = region.id;
+                regionsSelect.appendChild(newOption);
+            });
+
+            var toRegionButton = document.createElement('button');
+            toRegionButton.innerHTML = "Отправить в район";
+            toRegionButton.setAttribute("onclick", 'sendForcesToRegion();');
+            forces_frame.appendChild(toRegionButton);
+
+        });
+
+
 }
 
 function createNewForce() {
@@ -245,16 +277,55 @@ function createNewForce() {
 
     post(url, action, body).then(promiseRequest).then( function () {
         forcesList();
+        shipList();
     });
+}
+
+function deleteForce(force_id) {
+    if (!force_id) return false;
+
+    var action = "deleteForce";
+    var body = JSON.stringify({"id" : force_id});
+
+    var toDel = confirm("Удалить отряд?");
+
+    if (toDel) {
+        post(url, action, body).then(promiseRequest).then( function () {
+            forcesList();
+            shipList();
+        });
+    }
 }
 
 function forcesInRegion(checkbox) {
     if (checkbox.checked == true) {
         forcesToRegion.push(checkbox.value);
     } else {
-        var index = forcesToRegion.indexOf(checkbox.value);
-        forcesToRegion.shift(index);
+        var index = forcesToRegion.findIndex( function(element) {
+            if (element == checkbox.value) {
+                return element;
+            }
+        });
+        forcesToRegion.splice(index, 1);
     }
+}
+
+function sendForcesToRegion()
+{
+    var region_id = document.getElementById("regionsSelect").value;
+
+    if (forcesToRegion.length < 1 || !region_id) return false;
+
+    var action = "sendForcesToRegion";
+    var body = JSON.stringify({"forces" : forcesToRegion, "region_id" : region_id});
+
+    console.log(region_id);
+
+    post(url, action, body).then(promiseRequest).then( function () {
+        forcesList();
+        shipList();
+    });
+
 }
 
 function shipsInForces(checkbox) {

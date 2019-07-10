@@ -57,7 +57,17 @@ class Forces
         $forces->execute(array("country" => $country));
 
         return $forces->fetchAll(PDO::FETCH_ASSOC);
+    }
 
+    public function getRegionsList()
+    {
+        $connection = $this->db;
+        $query = "SELECT * FROM regions";
+        $regions = $connection->prepare($query);
+        $regions->setFetchMode(PDO::FETCH_ASSOC);
+        $regions->execute();
+
+        return $regions->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function setShipsToForce($ships_list) {
@@ -69,6 +79,47 @@ class Forces
         $query = "UPDATE ships SET force_id = :force_id WHERE id IN($ships)";
         $result = $connection->prepare($query);
         $result->execute(array("force_id" => $force_id));
+    }
+
+    public function createNewForce($force_name)
+    {
+        $connection = $this->db;
+        $country = $this->getSides()["player"];
+        $query = "INSERT INTO forces (force_name, country) VALUES (:force_name, :country)";
+        $result = $connection->prepare($query);
+        $result->execute(array("country" => $country, "force_name" => $force_name));
+    }
+
+    public function deleteForce($id)
+    {
+        if (!$id) throw new Exception("Не передан id отряда");
+
+        $connection = $this->db;
+        $query = "DELETE FROM forces WHERE id = :id LIMIT 1";
+        $result = $connection->prepare($query);
+        $result->execute(array("id" => $id));
+    }
+
+    public function updateForce($id, $force_name)
+    {
+        $connection = $this->db;
+        $query = "UPDATE forces SET force_name = :force_name WHERE id = :id LIMIT 1";
+        $result = $connection->prepare($query);
+        $result->execute(array("id" => $id, "force_name" => $force_name));
+    }
+
+    public function setRegion($forses, $region_id)
+    {
+        if (!$region_id) throw new Exception("Не передан id региона");
+
+        if (!$forses || count($forses) < 1) throw new Exception("Не выбраны отряды");
+
+        $forses = implode(",", $forses);
+
+        $connection = $this->db;
+        $query = "UPDATE forces SET region_id = :region_id WHERE id IN($forses)";
+        $result = $connection->prepare($query);
+        $result->execute(array("region_id" => $region_id));
     }
 
 }

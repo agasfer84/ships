@@ -57,3 +57,8 @@ ul{list-style-type:none;}
 #forces_frame {
     float: right;
 }
+
+#regionsSelect {
+    display: block;
+    margin-top: 10px;
+}
