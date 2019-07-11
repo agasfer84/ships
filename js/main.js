@@ -155,10 +155,13 @@ function forcesList() {
     var action = "forcesList";
     var params = JSON.stringify({});
     var list_frame = document.getElementById("list_frame");
+
+    if (!document.getElementById("list_frame")) return false;
+
     var forces_frame = document.getElementById("forces_frame");
 
     get(url, action, id, params).then(promiseRequest).then(
-        function(data){
+        function (data) {
             forces_frame.innerHTML = "";
             var newUl = document.createElement('ul');
             document.getElementById("forces_frame").appendChild(newUl);
@@ -192,6 +195,8 @@ function forcesList() {
             newForceButton.innerHTML = "Создать отряд";
             newForceButton.setAttribute("onclick", "createNewForce();");
             forces_frame.appendChild(newForceButton);
+
+            regionsList();
         });
 }
 
@@ -229,7 +234,6 @@ function shipList() {
             });
 
             forcesList();
-            regionsList();
         }
     );
 }
@@ -239,6 +243,8 @@ function regionsList() {
     var params = JSON.stringify({});
 
     var forces_frame = document.getElementById("forces_frame");
+
+    if (!forces_frame) return false;
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data){
@@ -265,13 +271,14 @@ function regionsList() {
 
 function populateMap(regions)
 {
-    var top_frame = document.getElementById("top_frame");
+    var map_frame = document.getElementById("map_frame");
+    map_frame.innerHTML = "";
 
     regions.forEach(function(region) {
         var newRegionDiv = document.createElement('div');
         newRegionDiv.setAttribute("class", "map_region");
         newRegionDiv.innerHTML = region.region.region_name;
-        top_frame.appendChild(newRegionDiv);
+        map_frame.appendChild(newRegionDiv);
 
         var forces = region.forces;
 
@@ -339,9 +346,8 @@ function sendForcesToRegion()
 
     post(url, action, body).then(promiseRequest).then( function () {
         forcesList();
-        shipList();
+        regionsList();
     });
-
 }
 
 function shipsInForces(checkbox) {
@@ -366,9 +372,20 @@ function changeForce() {
 
 }
 
+function turn() {
+    var action = "turn";
+    var params = JSON.stringify({});
+
+    get(url, action, id, params).then(promiseRequest).then(
+        function(data){
+
+        });
+}
+
 /* end forces interface*/
 
 window.onload = function() {
     shipInit();
     shipList();
+    regionsList();
 };

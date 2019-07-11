@@ -7,6 +7,20 @@ html, body{background-color: rgb(249,249,249);color:#000000;}
     border-bottom:1px solid lightgrey;
 }
 
+#map_frame
+{
+    width:100%;
+    /*min-height:350px;*/
+    border-bottom:1px solid lightgrey;
+}
+
+#turn_frame {
+    width:100%;
+    border-top:1px solid lightgrey;
+    text-align: right;
+    margin-top: 20px;
+}
+
 #log_frame
 {
     /*width:100%;*/
@@ -61,4 +75,9 @@ ul{list-style-type:none;}
 #regionsSelect {
     display: block;
     margin-top: 10px;
+}
+
+.map_region p {
+    padding-left: 10px;
+    font-size: 0.8em;
 }

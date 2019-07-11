@@ -81,6 +81,11 @@ if ($_action == "sendForcesToRegion") {
     $result = $Forces->setRegion($forcesToRegion->forces, $forcesToRegion->region_id);
 }
 
+if ($_action == "turn") {
+    $Forces = new Forces();
+    $result = $Forces->turn();
+}
+
 if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test
     $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);

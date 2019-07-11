@@ -148,9 +148,65 @@ class Forces
         $forses = implode(",", $forses);
 
         $connection = $this->db;
-        $query = "UPDATE forces SET region_id = :region_id WHERE id IN($forses)";
+        $query = "UPDATE forces SET region_id = :region_id WHERE id IN($forses);
+        UPDATE ships SET inaction = 1 WHERE force_id IN($forses);
+        ";
         $result = $connection->prepare($query);
         $result->execute(array("region_id" => $region_id));
+    }
+
+    public function getAIForcesWithoutRegion()
+    {
+        $connection = $this->db;
+        $country = $this->getSides()["enemy"];
+        $query = "SELECT * FROM forces WHERE country=:country AND region_id IS NULL";
+        $forces = $connection->prepare($query);
+        $forces->setFetchMode(PDO::FETCH_ASSOC);
+        $forces->execute(array("country" => $country));
+
+        return $forces->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function setRegionForAIForces()
+    {
+        $forces = $this->getAIForcesWithoutRegion();
+        $regions = $this->getRegionsList();
+
+        if (count($forces) < 1) throw new Exception("Нет незадействованных отрядов");
+
+        foreach ($forces as $force) {
+            $random_region_key = array_rand($regions);
+            $random_region_id = $regions[$random_region_key]["id"];
+
+            $connection = $this->db;
+            $query = "UPDATE forces SET region_id = :region_id WHERE id = :force_id;
+            UPDATE ships SET inaction = 1 WHERE force_id = :force_id";
+            $result = $connection->prepare($query);
+            $result->execute(array("region_id" => $random_region_id, "force_id" => $force["id"]));
+        }
+
+        return true;
+    }
+
+    public function getRegionForBattle()
+    {
+        $connection = $this->db;
+        $query = "select DISTINCT f.country, f.region_id from forces f inner join ships s on s.force_id=f.id where s.inaction = 1 and f.region_id is not null";
+        $forces = $connection->prepare($query);
+        $forces->setFetchMode(PDO::FETCH_ASSOC);
+        $forces->execute();
+        $result = [];
+
+        foreach ($forces as $force) {
+            $result[$force["country"]][] = $force["region_id"];
+        }
+
+        $result = array_intersect($result["russia"], $result["japan"]);
+    }
+
+    public function turn()
+    {
+        return $this->setRegionForAIForces();
     }
 
 }

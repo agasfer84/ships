@@ -1,3 +1,7 @@
+<?php
+$switch = "forces";
+//$switch = "battle";
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,6 +15,13 @@
     <script src="js/main.js"></script>
 </head>
 <body>
+
+<?php
+if ($switch =="forces") {
+?>
+<div id="map_frame">
+</div>
+<?php }?>
 
 <div id="top_frame">
     <div id="shipinfo_block">
@@ -28,10 +39,7 @@
 </div>
 
 <?php
-$switch = "forces";
-//$switch = "battle";
-
-if($switch =="battle"){
+if ($switch =="battle") {
 ?>
 
 
@@ -51,10 +59,6 @@ if($switch =="battle"){
 </div>
 <div><button id="fire_button" onclick="fire()" disabled="disabled">Огонь</button></div>
 
-
-
-
-
 <?php
 }
 else if($switch =="forces") {
@@ -64,6 +68,10 @@ else if($switch =="forces") {
     </div>
     <div id="forces_frame">
     </div>
+
+<div id="turn_frame">
+    <button id="turn_button" onclick="turn()">Ход</button>
+</div>
 
 
 <?php }?>

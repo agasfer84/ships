@@ -22,6 +22,8 @@ class Ships
 
     const INCHES_TO_MM = 25.4;
 
+    public static $region_id = 0;
+
     public function __construct()
     {
         $db = new Database();
@@ -30,8 +32,25 @@ class Ships
 
     public function getBattleForces()
     {
-       $result["rus_force_id"] = [121, 122, 131];
-       $result["jap_force_id"] = [21];
+        $connection = $this->db;
+        $query = "SELECT id, country FROM forces WHERE region_id = :region_id";
+        $forces = $connection->prepare($query);
+        $forces->setFetchMode(PDO::FETCH_ASSOC);
+        $forces->execute(array("region_id" => self::$region_id));
+
+        $result["rus_force_id"] = [];
+        $result["jap_force_id"] = [];
+
+        foreach ($forces as $force) {
+            if ($force["country"] == 'russia') {
+                $result["rus_force_id"][] = $force["id"];
+            } else {
+                $result["jap_force_id"][] = $force["id"];
+            }
+        }
+
+//       $result["rus_force_id"] = [121, 122, 131];
+//       $result["jap_force_id"] = [21];
 
        return $result;
     }
@@ -414,7 +433,7 @@ class Ships
             }
 
             $connection = $this->db;
-            $query = "UPDATE ships SET flooding=flooding+:flooding_level WHERE id=:shipid";
+            $query = "UPDATE ships SET flooding = flooding + :flooding_level WHERE id = :shipid";
             $result_query = $connection->prepare($query);
             $result_query->execute(array("flooding_level" => $flooding_level, "shipid" => $shipid));
         }
@@ -476,7 +495,7 @@ class Ships
             $k_armour = self::KRUPP_ARMOUR;
         }
 
-        $result["effective_armour"] = $result["belt"] * $k_armour;
+        $result["effective_armour"] = round($result["belt"] * $k_armour, 2);
 
         return $result;
     }
