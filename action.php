@@ -89,8 +89,8 @@ if ($_action == "turn") {
 if ($_action == "checkSwitch") {
     $Ships = new Ships();
 
-    if ($region_id = $Ships->getRegionForBattle()) {
-        $result = $region_id;
+    if ($region = $Ships->getRegionForBattle()) {
+        $result = $region;
     } else {
         $result = false;
     }

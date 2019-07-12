@@ -58,14 +58,16 @@ class Ships
     public function getRegionForBattle()
     {
         $connection = $this->db;
-        $query = "select DISTINCT f.country, f.region_id from forces f inner join ships s on s.force_id=f.id where s.inaction = 1 and f.region_id is not null";
+        $query = "select DISTINCT f.country, f.region_id, r.region_name from forces f inner join ships s on s.force_id=f.id
+inner join regions r on r.id = f.region_id
+where s.inaction = 1 and f.region_id is not null";
         $forces = $connection->prepare($query);
         $forces->setFetchMode(PDO::FETCH_ASSOC);
         $forces->execute();
         $result = [];
 
         foreach ($forces as $force) {
-            $result[$force["country"]][] = $force["region_id"];
+            $result[$force["country"]][] = ["region_id" => $force["region_id"], "region_name" => $force["region_name"]];
         }
 
         $result = array_intersect($result["russia"], $result["japan"]);
@@ -87,7 +89,7 @@ class Ships
 
     public function initShips()
     {
-        if ($battle_region = $this->getRegionForBattle()) {
+        if ($battle_region = $this->getRegionForBattle()["region_id"]) {
             self::$region_id = $battle_region;
         } else {
             return false;
@@ -490,11 +492,11 @@ class Ships
         $ships->setFetchMode(PDO::FETCH_ASSOC);
         $ships->execute(array("enemy" => $enemy));
 
-        $result = "Цель:&nbsp;<select class='target_list' name='enemy_list' onchange='setTarget(this.options[this.selectedIndex].value, $shipid); buttonEnabled()'>";
+        $result = "Цель:&nbsp;<select id=$shipid class='target_list' name='enemy_list' onchange='setTarget(this.options[this.selectedIndex].value, $shipid); buttonEnabled()'>";
         $result .="<option value='' selected disabled>"."Выберите цель..."."</option>";
 
         foreach ($ships as $key => $ship) {
-            $result .="<option value=".$ship['id'].">".$ship["name"]."</option>";
+            $result .="<option id=" . $shipid . "_" . $ship['id'] . " value=" . $ship['id'] . ">" . $ship["name"] . "</option>";
         }
 
         $result .= "</select>";

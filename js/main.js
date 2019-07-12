@@ -52,7 +52,6 @@ function shipInit() {
     var action = "shipInit";
     var params = JSON.stringify({});
 
-    target_list = [];
     buttonEnabled();
 
     document.getElementById("ship_name").innerHTML = "";
@@ -90,6 +89,7 @@ function shipInit() {
                 document.getElementById("jap_ul").appendChild(newJapLi);
             });
 
+            populateTargets();
         }
     );
 }
@@ -102,12 +102,22 @@ function setTarget(enemy_id, ship_id)
     }
 
     target_list[ship_id] = {ship_id : ship_id, enemy_id : enemy_id};
+
+    console.log(target_list);
+}
+
+function populateTargets() {
+    target_list.forEach(function(item) {
+        //console.log(item);
+        var option = document.getElementById(item.ship_id + "_" + item.enemy_id);
+        //console.log(option);
+        option.setAttribute("selected", "selected");
+    });
 }
 
 function fire()
 {
     //console.log(target_list);
-
     var action = "fire";
     var body = JSON.stringify({"target_list" : target_list});
 
@@ -410,7 +420,12 @@ function checkSwitch() {
     get(url, action, id, params).then(promiseRequest).then(
         function (data) {
             if (!search && data) {
-                window.location.href = "/?region_id=" + data;
+                window.location.href = "/?region_id=" + data.region_id;
+            }
+
+            if (data) {
+                var map_frame = document.getElementById("map_frame");
+                map_frame.innerHTML = '<div style="text-align: center;">' + data.region_name + '</div>';
             }
         });
 }

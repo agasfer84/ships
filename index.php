@@ -18,11 +18,14 @@ $switch = ($region_id) ? "battle" : "forces";
 <body>
 
 <?php
-if ($switch == "forces") {
+//if ($switch == "forces") {
+//
 ?>
 <div id="map_frame">
 </div>
-<?php }?>
+<?php
+//}
+?>
 
 <div id="top_frame">
     <div id="shipinfo_block">
@@ -42,7 +45,6 @@ if ($switch == "forces") {
 <?php
 if ($switch == "battle") {
 ?>
-
 
 <div id="battle_frame">
     <div id="rus_column" class="inline columns">
@@ -74,10 +76,7 @@ else if($switch == "forces") {
     <button id="turn_button" onclick="turn()">Ход</button>
 </div>
 
-
 <?php }?>
-
-
 
 </body>
 </html>
