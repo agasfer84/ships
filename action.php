@@ -86,12 +86,23 @@ if ($_action == "turn") {
     $result = $Forces->turn();
 }
 
+if ($_action == "checkSwitch") {
+    $Ships = new Ships();
+
+    if ($region_id = $Ships->getRegionForBattle()) {
+        $result = $region_id;
+    } else {
+        $result = false;
+    }
+}
+
 if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test
-    $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
-    $Ships = new Ships();
-    $result = $Ships->fire($target_list);
-    $result = $Ships->ai_fire();
+//    $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
+//    $Ships = new Ships();
+//    $result = $Ships->fire($target_list);
+//    $result = $Ships->ai_fire();
+
 }
 
 $response = $result;

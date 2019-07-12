@@ -55,6 +55,28 @@ class Ships
        return $result;
     }
 
+    public function getRegionForBattle()
+    {
+        $connection = $this->db;
+        $query = "select DISTINCT f.country, f.region_id from forces f inner join ships s on s.force_id=f.id where s.inaction = 1 and f.region_id is not null";
+        $forces = $connection->prepare($query);
+        $forces->setFetchMode(PDO::FETCH_ASSOC);
+        $forces->execute();
+        $result = [];
+
+        foreach ($forces as $force) {
+            $result[$force["country"]][] = $force["region_id"];
+        }
+
+        $result = array_intersect($result["russia"], $result["japan"]);
+
+        if (count($result) > 0) {
+            return  $result[0];
+        } else {
+            return false;
+        }
+    }
+
     public function getSides()
     {
         $result["player"] = 'russia';
@@ -65,6 +87,12 @@ class Ships
 
     public function initShips()
     {
+        if ($battle_region = $this->getRegionForBattle()) {
+            self::$region_id = $battle_region;
+        } else {
+            return false;
+        }
+
         $connection = $this->db;
         $rus_force_id = implode(",", $this->getBattleForces()["rus_force_id"]);
         $jap_force_id = implode(",", $this->getBattleForces()["jap_force_id"]);

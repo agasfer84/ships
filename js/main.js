@@ -87,7 +87,7 @@ function shipInit() {
                 var newJapLi = document.createElement('li');
                 newJapLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo(" + item.id + ");'><p class='ship_name'>" + item.name + "</p></a><img src='/images/'" + item.image + " />"
                     + item.fires_line + item.flooding_line + item.crew_line;
-                document.getElementById("rus_ul").appendChild(newJapLi);
+                document.getElementById("jap_ul").appendChild(newJapLi);
             });
 
         }
@@ -166,18 +166,29 @@ function forcesList() {
             var newUl = document.createElement('ul');
             document.getElementById("forces_frame").appendChild(newUl);
 
-            var forcesSelect = document.createElement('select');
-            forcesSelect.setAttribute("id", "forcesSelect");
-            list_frame.appendChild(forcesSelect);
+            var forcesSelect = document.getElementById('forcesSelect');
 
-            var changeForceButton = document.createElement('button');
-            changeForceButton.setAttribute("onclick", "changeForce()");
-            changeForceButton.innerHTML = "Назначить отряд";
-            list_frame.appendChild(changeForceButton);
+            if (forcesSelect) {
+                forcesSelect.innerHTML = "";
+            } else {
+                forcesSelect = document.createElement('select');
+                forcesSelect.setAttribute("id", "forcesSelect");
+                list_frame.appendChild(forcesSelect);
+            }
+
+            var changeForceButton = document.getElementById('changeForce_button');
+
+            if (!changeForceButton) {
+                changeForceButton = document.createElement('button');
+                changeForceButton.setAttribute("onclick", "changeForce()");
+                changeForceButton.setAttribute("id", "changeForce_button");
+                changeForceButton.innerHTML = "Назначить отряд";
+                list_frame.appendChild(changeForceButton);
+            }
 
             data.forEach(function(force) {
                 var newLi = document.createElement('li');
-                newLi.innerHTML = force.force_name + '<input type="checkbox" name="forcesInRegionCheckboxes" onchange="forcesInRegion(this)" value=' + force.id + '>' + '<a href="#" onclick="deleteForce(' + force.id + ')">Удалить</a>';
+                newLi.innerHTML = force.force_name + ((force.region_name) ? ' ('+force.region_name+')' : '') + '<input type="checkbox" name="forcesInRegionCheckboxes" onchange="forcesInRegion(this)" value=' + force.id + '>' + '<a href="#" onclick="deleteForce(' + force.id + ')">Удалить</a>';
                 newUl.appendChild(newLi);
 
                 var newOption = document.createElement('option');
@@ -210,7 +221,6 @@ function shipList() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data){
-            //console.log(data);
             document.getElementById("list_frame").innerHTML = "";
 
             var newUl = document.createElement('ul');
@@ -248,10 +258,15 @@ function regionsList() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data){
-            console.log(data);
-            var regionsSelect = document.createElement('select');
-            regionsSelect.setAttribute("id", "regionsSelect");
-            forces_frame.appendChild(regionsSelect);
+            var regionsSelect = document.getElementById("regionsSelect");
+
+            if (regionsSelect) {
+                regionsSelect.innerHTML = "";
+            } else {
+                regionsSelect = document.createElement('select');
+                regionsSelect.setAttribute("id", "regionsSelect");
+                forces_frame.appendChild(regionsSelect);
+            }
 
             data.forEach(function(item) {
                 var newOption = document.createElement('option');
@@ -260,10 +275,15 @@ function regionsList() {
                 regionsSelect.appendChild(newOption);
             });
 
-            var toRegionButton = document.createElement('button');
-            toRegionButton.innerHTML = "Отправить в район";
-            toRegionButton.setAttribute("onclick", 'sendForcesToRegion();');
-            forces_frame.appendChild(toRegionButton);
+            var toRegionButton = document.getElementById('regionsSelect_button');
+
+            if (!toRegionButton) {
+                toRegionButton = document.createElement('button');
+                toRegionButton.innerHTML = "Отправить в район";
+                toRegionButton.setAttribute("id", "regionsSelect_button");
+                toRegionButton.setAttribute("onclick", 'sendForcesToRegion();');
+                forces_frame.appendChild(toRegionButton);
+            }
 
             populateMap(data);
         });
@@ -342,7 +362,7 @@ function sendForcesToRegion()
     var action = "sendForcesToRegion";
     var body = JSON.stringify({"forces" : forcesToRegion, "region_id" : region_id});
 
-    console.log(region_id);
+    //console.log(region_id);
 
     post(url, action, body).then(promiseRequest).then( function () {
         forcesList();
@@ -377,14 +397,28 @@ function turn() {
     var params = JSON.stringify({});
 
     get(url, action, id, params).then(promiseRequest).then(
-        function(data){
+        function (data) {
+            checkSwitch();
+        });
+}
 
+function checkSwitch() {
+    var action = "checkSwitch";
+    var params = JSON.stringify({});
+    var search = window.location.search;
+
+    get(url, action, id, params).then(promiseRequest).then(
+        function (data) {
+            if (!search && data) {
+                window.location.href = "/?region_id=" + data;
+            }
         });
 }
 
 /* end forces interface*/
 
 window.onload = function() {
+    checkSwitch();
     shipInit();
     shipList();
     regionsList();

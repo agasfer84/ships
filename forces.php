@@ -51,7 +51,7 @@ class Forces
     {
         $connection = $this->db;
         $country = $this->getSides()["player"];
-        $query = "SELECT * FROM forces WHERE country=:country";
+        $query = "SELECT f.*, r.region_name FROM forces f INNER JOIN regions r ON r.id = f.region_id WHERE f.country=:country";
         $forces = $connection->prepare($query);
         $forces->setFetchMode(PDO::FETCH_ASSOC);
         $forces->execute(array("country" => $country));
@@ -167,12 +167,24 @@ class Forces
         return $forces->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getAIForcesAll()
+    {
+        $connection = $this->db;
+        $country = $this->getSides()["enemy"];
+        $query = "SELECT * FROM forces WHERE country=:country";
+        $forces = $connection->prepare($query);
+        $forces->setFetchMode(PDO::FETCH_ASSOC);
+        $forces->execute(array("country" => $country));
+
+        return $forces->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function setRegionForAIForces()
     {
-        $forces = $this->getAIForcesWithoutRegion();
+        $forces = $this->getAIForcesAll();
         $regions = $this->getRegionsList();
 
-        if (count($forces) < 1) throw new Exception("Нет незадействованных отрядов");
+        if (count($forces) < 1) return false;
 
         foreach ($forces as $force) {
             $random_region_key = array_rand($regions);
@@ -186,22 +198,6 @@ class Forces
         }
 
         return true;
-    }
-
-    public function getRegionForBattle()
-    {
-        $connection = $this->db;
-        $query = "select DISTINCT f.country, f.region_id from forces f inner join ships s on s.force_id=f.id where s.inaction = 1 and f.region_id is not null";
-        $forces = $connection->prepare($query);
-        $forces->setFetchMode(PDO::FETCH_ASSOC);
-        $forces->execute();
-        $result = [];
-
-        foreach ($forces as $force) {
-            $result[$force["country"]][] = $force["region_id"];
-        }
-
-        $result = array_intersect($result["russia"], $result["japan"]);
     }
 
     public function turn()

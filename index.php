@@ -1,5 +1,6 @@
 <?php
-$switch = "forces";
+$region_id = $_REQUEST["region_id"];
+$switch = ($region_id) ? "battle" : "forces";
 //$switch = "battle";
 ?>
 <!DOCTYPE html>
@@ -17,7 +18,7 @@ $switch = "forces";
 <body>
 
 <?php
-if ($switch =="forces") {
+if ($switch == "forces") {
 ?>
 <div id="map_frame">
 </div>
@@ -39,7 +40,7 @@ if ($switch =="forces") {
 </div>
 
 <?php
-if ($switch =="battle") {
+if ($switch == "battle") {
 ?>
 
 
@@ -61,7 +62,7 @@ if ($switch =="battle") {
 
 <?php
 }
-else if($switch =="forces") {
+else if($switch == "forces") {
 ?>
 
     <div id="list_frame">
