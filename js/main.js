@@ -66,6 +66,11 @@ function shipInit() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data) {
+
+            if (!data || data.length < 1) {
+               checkSwitch();
+            }
+
             document.getElementById("rus_ul").innerHTML = "";
             document.getElementById("jap_ul").innerHTML = "";
             document.getElementById("min_speed_rus").innerHTML = "Скорость эскадры:&nbsp;" + data[0].rus_ships_speed + "&nbsp;уз.";
@@ -111,7 +116,9 @@ function populateTargets() {
         //console.log(item);
         var option = document.getElementById(item.ship_id + "_" + item.enemy_id);
         //console.log(option);
-        option.setAttribute("selected", "selected");
+        if (option) {
+            option.setAttribute("selected", "selected");
+        }
     });
 }
 
@@ -141,7 +148,9 @@ function exitShip(shipid)
     var action = "exitShip";
     var params = JSON.stringify({});
 
-    get(url, action, shipid, params).then(promiseRequest);
+    get(url, action, shipid, params).then(promiseRequest).then(function(data) {
+        shipInit();
+    });
 }
 
 function  buttonEnabled() {
@@ -426,6 +435,10 @@ function checkSwitch() {
             if (data) {
                 var map_frame = document.getElementById("map_frame");
                 map_frame.innerHTML = '<div style="text-align: center;">' + data.region_name + '</div>';
+            }
+
+            if (!data && search) {
+                window.location.href = "/";
             }
         });
 }

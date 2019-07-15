@@ -99,9 +99,10 @@ if ($_action == "checkSwitch") {
 if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test
 //    $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
-//    $Ships = new Ships();
+    $Ships = new Ships();
 //    $result = $Ships->fire($target_list);
 //    $result = $Ships->ai_fire();
+    $result = $Ships->initShips();
 
 }
 

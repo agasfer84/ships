@@ -22,7 +22,7 @@ class Ships
 
     const INCHES_TO_MM = 25.4;
 
-    public static $region_id = 0;
+    public static $region_id;
 
     public function __construct()
     {
@@ -32,11 +32,18 @@ class Ships
 
     public function getBattleForces()
     {
+        if ($battle_region = $this->getRegionForBattle()["region_id"]) {
+            self::$region_id = $battle_region;
+        } else {
+            return false;
+        }
+
         $connection = $this->db;
         $query = "SELECT id, country FROM forces WHERE region_id = :region_id";
         $forces = $connection->prepare($query);
         $forces->setFetchMode(PDO::FETCH_ASSOC);
         $forces->execute(array("region_id" => self::$region_id));
+        $forces = $forces->fetchAll();
 
         $result["rus_force_id"] = [];
         $result["jap_force_id"] = [];
@@ -49,25 +56,34 @@ class Ships
             }
         }
 
-//       $result["rus_force_id"] = [121, 122, 131];
-//       $result["jap_force_id"] = [21];
-
        return $result;
     }
 
     public function getRegionForBattle()
     {
+        $this->checkDamageForAll();
+
         $connection = $this->db;
         $query = "select DISTINCT f.country, f.region_id, r.region_name from forces f inner join ships s on s.force_id=f.id
 inner join regions r on r.id = f.region_id
-where s.inaction = 1 and f.region_id is not null";
+where s.inaction = 1 and s.isactive = 1 and f.region_id is not null";
         $forces = $connection->prepare($query);
         $forces->setFetchMode(PDO::FETCH_ASSOC);
         $forces->execute();
+        $forces = $forces->fetchAll();
+
+        if (count($forces) < 1) {
+            return false;
+        }
+
         $result = [];
 
         foreach ($forces as $force) {
             $result[$force["country"]][] = ["region_id" => $force["region_id"], "region_name" => $force["region_name"]];
+        }
+
+        if (!$result["russia"] || !$result["japan"]) {
+            return false;
         }
 
         $result = array_intersect($result["russia"], $result["japan"]);
@@ -89,31 +105,44 @@ where s.inaction = 1 and f.region_id is not null";
 
     public function initShips()
     {
-        if ($battle_region = $this->getRegionForBattle()["region_id"]) {
-            self::$region_id = $battle_region;
-        } else {
-            return false;
+        $connection = $this->db;
+
+        if (!$forces = $this->getBattleForces()) {
+            return [];
         }
 
-        $connection = $this->db;
-        $rus_force_id = implode(",", $this->getBattleForces()["rus_force_id"]);
-        $jap_force_id = implode(",", $this->getBattleForces()["jap_force_id"]);
+//        $this->checkDamageForAll();
+
+        $rus_forces = $forces["rus_force_id"];
+        $jap_forces = $forces["jap_force_id"];
+
+        $rus_force_id = implode(",", $rus_forces);
+        $jap_force_id = implode(",", $jap_forces);
 
         $query_rus = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour a on a.shipid = s.id  WHERE s.country='russia' AND s.isactive=1 AND s.inaction=1 AND s.force_id IN ($rus_force_id) ORDER BY s.order_id";
         $rus_ships = $connection->prepare($query_rus);
         $rus_ships->setFetchMode(PDO::FETCH_ASSOC);
-        $rus_ships->execute();//array("rus_force_id" => $rus_force_id)
 
         $query_jap = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour a on a.shipid = s.id  WHERE s.country='japan' AND s.isactive=1 AND s.inaction=1 AND s.force_id IN ($jap_force_id) ORDER BY s.order_id";
         $jap_ships = $connection->prepare($query_jap);
         $jap_ships->setFetchMode(PDO::FETCH_ASSOC);
-        $jap_ships->execute();//array("jap_force_id" => $jap_force_id)
 
         $result = [];
 
+        if (!$rus_ships->execute() || !$jap_ships->execute() ) {
+            return [];
+        }
+
+        $jap_ships = $jap_ships->fetchAll(PDO::FETCH_ASSOC);
+        $rus_ships = $rus_ships->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($jap_ships) < 1 || count($rus_ships) < 1) {
+            return [];
+        }
+
         foreach ($rus_ships as $key => $rus_ship) {
 
-            if((int)$rus_ship["fires"] > 0){
+            if((int)$rus_ship["fires"] > 0) {
                 $repare = 2 * (round((int)$rus_ship["crew"] / 100)) - 1;
                 self::fireRepare($rus_ship["id"], $repare);
             }
@@ -126,26 +155,30 @@ where s.inaction = 1 and f.region_id is not null";
             $result["rus_ships"][$key]["fires_line"] = self::fires_line($rus_ship["id"]);
             $result["rus_ships"][$key]["flooding_line"] = self::flooding_line($rus_ship["id"]);
             $result["rus_ships"][$key]["crew_line"] = self::crew_line($rus_ship["id"]);
-            $result["rus_ships"][$key]["enemy_list"] = self::enemyList($rus_ship["id"], self::getSides()["enemy"]);
+            $result["rus_ships"][$key]["enemy_list"] = self::enemyList($rus_ship["id"], self::getSides()["enemy"], $jap_force_id);
             $result["rus_ships"][$key]["exit_button"] = self::exitButton($rus_ship, $jap_force_id);
         }
 
         foreach ($jap_ships as $key => $jap_ship) {
+
+            if (!$jap_ship ) {
+                return $result;
+            }
 
             if((int)$jap_ship["fires"] > 0) {
                 $repare = 2 * (round((int)$jap_ship["crew"] / 100)) - 1;
                 self::fireRepare($jap_ship["id"], $repare);
             }
 
-            if((int)$jap_ship["fires"] >= 100 || (int)$jap_ship["flooding"] >= 100) {
-                self::checkDamage($jap_ship["id"]);
-            }
+//            if((int)$jap_ship["fires"] >= 100 || (int)$jap_ship["flooding"] >= 100) {
+//                self::checkDamage($jap_ship["id"]);
+//            }
 
             $result["jap_ships"][$key] = $jap_ship;
             $result["jap_ships"][$key]["fires_line"] = self::fires_line($jap_ship["id"]);
             $result["jap_ships"][$key]["flooding_line"] = self::flooding_line($jap_ship["id"]);
             $result["jap_ships"][$key]["crew_line"] = self::crew_line($jap_ship["id"]);
-            $result["jap_ships"][$key]["enemy_list"] = self::enemyList($jap_ship["id"], self::getSides()["player"]);
+            $result["jap_ships"][$key]["enemy_list"] = self::enemyList($jap_ship["id"], self::getSides()["player"], $rus_force_id);
             $result["jap_ships"][$key]["exit_button"] = self::exitButton($jap_ship, $rus_force_id);
         }
 
@@ -196,6 +229,7 @@ where s.inaction = 1 and f.region_id is not null";
         }
 
         $min_speed = min($result);
+
         return $min_speed;
     }
 
@@ -205,6 +239,14 @@ where s.inaction = 1 and f.region_id is not null";
         $query = "UPDATE ships SET isactive=0 WHERE id=:shipid";
         $result_query = $connection->prepare($query);
         $result_query->execute(array("shipid" => $shipid));
+    }
+
+    public function checkDamageForAll()
+    {
+        $connection = $this->db;
+        $query = "UPDATE ships SET isactive=0 WHERE fires>=100 OR flooding>=100";
+        $result_query = $connection->prepare($query);
+        $result_query->execute();
     }
 
     public function fireRepare($shipid, $repare)
@@ -263,7 +305,6 @@ where s.inaction = 1 and f.region_id is not null";
 
     public function ai_list()
     {
-
         $jap_force_id = implode(",", $this->getBattleForces()["jap_force_id"]);
 
         $connection = $this->db;
@@ -484,10 +525,10 @@ where s.inaction = 1 and f.region_id is not null";
         }
     }
 
-    public function enemyList($shipid, $enemy)
+    public function enemyList($shipid, $enemy, $force_id_string)
     {
         $connection = $this->db;
-        $query = "SELECT * FROM ships WHERE country=:enemy";
+        $query = "SELECT * FROM ships WHERE country=:enemy AND force_id IN ($force_id_string)";
         $ships = $connection->prepare($query);
         $ships->setFetchMode(PDO::FETCH_ASSOC);
         $ships->execute(array("enemy" => $enemy));
