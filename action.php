@@ -11,7 +11,7 @@ $result = [];
 if ($_action == "shipInit") {
     $Ships = new Ships();
     $init_ships = $Ships->initShips();
-    $result = array($init_ships);
+    $result = $init_ships;
 }
 
 if ($_action == "shipInfo" && $_id) {

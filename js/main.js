@@ -73,11 +73,11 @@ function shipInit() {
 
             document.getElementById("rus_ul").innerHTML = "";
             document.getElementById("jap_ul").innerHTML = "";
-            document.getElementById("min_speed_rus").innerHTML = "Скорость эскадры:&nbsp;" + data[0].rus_ships_speed + "&nbsp;уз.";
-            document.getElementById("min_speed_jap").innerHTML = "Скорость эскадры:&nbsp;" + data[0].jap_ships_speed + "&nbsp;уз.";
+            document.getElementById("min_speed_rus").innerHTML = "Скорость эскадры:&nbsp;" + data.rus_ships_speed + "&nbsp;уз.";
+            document.getElementById("min_speed_jap").innerHTML = "Скорость эскадры:&nbsp;" + data.jap_ships_speed + "&nbsp;уз.";
 
-            var rus_ships = data[0].rus_ships;
-            var jap_ships = data[0].jap_ships;
+            var rus_ships = data["rus_ships"];
+            var jap_ships = data["jap_ships"];
 
             rus_ships.forEach(function(item, i, rus_ships) {
                 var newRusLi = document.createElement('li');
@@ -425,10 +425,11 @@ function checkSwitch() {
     var action = "checkSwitch";
     var params = JSON.stringify({});
     var search = window.location.search;
+    console.log(search);
 
     get(url, action, id, params).then(promiseRequest).then(
         function (data) {
-            if (!search && data) {
+            if (!search && (data)) {
                 window.location.href = "/?region_id=" + data.region_id;
             }
 
@@ -437,7 +438,7 @@ function checkSwitch() {
                 map_frame.innerHTML = '<div style="text-align: center;">' + data.region_name + '</div>';
             }
 
-            if (!data && search) {
+            if (!data && (search)) {
                 window.location.href = "/";
             }
         });
