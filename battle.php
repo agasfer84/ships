@@ -30,6 +30,14 @@ class Ships
         $this->db = $db;
     }
 
+    public function getSides()
+    {
+        $result["player"] = 'russia';
+        $result["enemy"] = 'japan';
+
+        return $result;
+    }
+
     public function getBattleForces()
     {
         if ($battle_region = $this->getRegionForBattle()["region_id"]) {
@@ -45,14 +53,14 @@ class Ships
         $forces->execute(array("region_id" => self::$region_id));
         $forces = $forces->fetchAll();
 
-        $result["rus_force_id"] = [];
-        $result["jap_force_id"] = [];
+        $result["player_force_id"] = [];
+        $result["enemy_force_id"] = [];
 
         foreach ($forces as $force) {
-            if ($force["country"] == 'russia') {
-                $result["rus_force_id"][] = $force["id"];
+            if ($force["country"] == $this->getSides()["player"]) {
+                $result["player_force_id"][] = $force["id"];
             } else {
-                $result["jap_force_id"][] = $force["id"];
+                $result["enemy_force_id"][] = $force["id"];
             }
         }
 
@@ -97,14 +105,6 @@ class Ships
         }
     }
 
-    public function getSides()
-    {
-        $result["player"] = 'russia';
-        $result["enemy"] = 'japan';
-
-        return $result;
-    }
-
     public function initShips()
     {
         $connection = $this->db;
@@ -115,10 +115,10 @@ class Ships
 
 //        $this->checkDamageForAll();
 
-        $rus_forces = $forces["rus_force_id"];
-        $jap_forces = $forces["jap_force_id"];
+        $player_forces = $forces["player_force_id"];
+        $enemy_forces = $forces["enemy_force_id"];
 
-        $forces_id = array_merge($rus_forces, $jap_forces);
+        $forces_id = array_merge($player_forces, $enemy_forces);
         $forces_id_string = implode(",", $forces_id);
         $query_ships = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour a on a.shipid = s.id WHERE s.isactive=1 AND s.inaction=1 AND s.force_id IN ($forces_id_string) 
         ORDER BY s.order_id";
@@ -133,9 +133,9 @@ class Ships
         $result = [];
 
         foreach ($ships as $ship) {
-            $side_name = ($ship["country"] == 'russia') ? "rus_ships" : "jap_ships";
-            $enemy_name = ($ship["country"] == 'russia') ? "enemy" : "player";
-            $enemy_forces = ($ship["country"] == 'russia') ? $jap_forces : $rus_forces;
+            $side_name = ($ship["country"] == 'russia') ? "player_ships" : "enemy_ships";
+            //$enemy_name = ($ship["country"] == 'russia') ? "enemy" : "player";
+            $enemy_forces_comparing = ($ship["country"] == $this->getSides()["player"]) ? $enemy_forces : $player_forces;
 
             if((int)$ship["fires"] > 0) {
                 $repare = 2 * (round((int)$ship["crew"] / 100)) - 1;
@@ -146,46 +146,30 @@ class Ships
                 self::checkDamage($ship["id"]);
             }
 
-            $ship["fires_line"] = self::fires_line($ship["id"]);
-            $ship["flooding_line"] = self::flooding_line($ship["id"]);
-            $ship["crew_line"] = self::crew_line($ship["id"]);
-            $ship["enemy_list"] = self::enemyList($ship["id"], self::getSides()[$enemy_name], $forces_id);
-            $ship["exit_button"] = self::exitButton($ship, $enemy_forces);
+            $ship["exit_button"] = self::exitButton($ship, $enemy_forces_comparing);
             $result[$side_name][] = $ship;
         }
 
-        if (count($result["rus_ships"]) < 1 || count($result["jap_ships"]) < 1) {
+        if (count($result["player_ships"]) < 1 || count($result["enemy_ships"]) < 1) {
             return [];
         }
 
-        $result["jap_ships_speed"] = self::minSpeed($jap_forces);
-        $result["rus_ships_speed"] = self::minSpeed($rus_forces);
+        $result["enemy_ships_speed"] = self::minSpeed($enemy_forces);
+        $result["player_ships_speed"] = self::minSpeed($player_forces);
+        $result["enemy_list"] = self::enemyList(self::getSides()["enemy"], $forces_id);
 
         return $result;
     }
 
     public function exitButton($ship, $enemy_force_id)
     {
-        $disabled = true;
-        $shipid = $ship["id"];
-
-        if ($ship["speed"] > self::minSpeed($enemy_force_id)) {
-            $disabled = false;
-        }
-
-        if ($disabled) {
-            $result = "<button disabled='disabled'>Выход из боя</button>";
-        } else {
-            $result = "<button onclick='exitShip($shipid)'>Выход из боя</button>";
-        }
-
-        return $result;
+        return ($ship["speed"] > self::minSpeed($enemy_force_id));
     }
 
     public function exitShip($shipid)
     {
         $connection = $this->db;
-        $query = "UPDATE ships SET inaction=0 WHERE id=:shipid";
+        $query = "UPDATE ships SET inaction = 0 WHERE id = :shipid";
         $result_query = $connection->prepare($query);
 
         return $result_query->execute(array("shipid" => $shipid));
@@ -196,7 +180,7 @@ class Ships
         $result = [];
         $force_id_string = implode(",", $force_id);
         $connection = $this->db;
-        $query = "SELECT s.* FROM ships s WHERE s.force_id IN ($force_id_string) AND s.isactive=1 AND s.inaction=1 ORDER BY s.order_id";
+        $query = "SELECT s.* FROM ships s WHERE s.force_id IN ($force_id_string) AND s.isactive = 1 AND s.inaction = 1 ORDER BY s.order_id";
         $ships = $connection->prepare($query);
         $ships->setFetchMode(PDO::FETCH_ASSOC);
         $ships->execute();
@@ -213,7 +197,7 @@ class Ships
     public function checkDamage($shipid)
     {
         $connection = $this->db;
-        $query = "UPDATE ships SET isactive=0 WHERE id=:shipid";
+        $query = "UPDATE ships SET isactive = 0 WHERE id = :shipid";
         $result_query = $connection->prepare($query);
         $result_query->execute(array("shipid" => $shipid));
     }
@@ -221,7 +205,7 @@ class Ships
     public function checkDamageForAll()
     {
         $connection = $this->db;
-        $query = "UPDATE ships SET isactive=0 WHERE fires>=100 OR flooding>=100";
+        $query = "UPDATE ships SET isactive = 0 WHERE fires >= 100 OR flooding >= 100";
         $result_query = $connection->prepare($query);
         $result_query->execute();
     }
@@ -229,7 +213,7 @@ class Ships
     public function fireRepare($shipid, $repare)
     {
         $connection = $this->db;
-        $query = "UPDATE ships SET fires=fires-:repare WHERE id=:shipid";
+        $query = "UPDATE ships SET fires = fires - :repare WHERE id = :shipid";
         $result_query = $connection->prepare($query);
         $result_query->execute(array("repare" => $repare, "shipid" => $shipid));
     }
@@ -250,8 +234,7 @@ class Ships
 
       $result2 = [];
 
-      for($i = 0; $i < count($result); ++$i) {
-
+      for ($i = 0; $i < count($result); ++$i) {
         foreach ($result[$i] as $res)
         {
             $result2[] = $res;
@@ -270,6 +253,8 @@ class Ships
                 $res2["fire_result_name"] = $fire_result["fire_result_name"];
                 $res2["fire_result_type_name"] = $fire_result["fire_result_type_name"];
                 $res2["fire_result_type"] = $fire_result["fire_result_type"];
+                $res2["fire_result"] = $fire_result["fire_result"];
+                $res2["fire_result_side"] = $fire_result["fire_result_side"];
                 self::fire_exec($res2);
                 $result3[] = $res2;
             }
@@ -277,36 +262,17 @@ class Ships
     }
 
       return $result3;
-
-    }
-
-    public function ai_list()
-    {
-        $jap_force_id = implode(",", $this->getBattleForces()["jap_force_id"]);
-
-        $connection = $this->db;
-        $query_jap = "SELECT id FROM ships WHERE force_id IN ($jap_force_id)";
-        $jap_ships = $connection->prepare($query_jap);
-        $jap_ships->setFetchMode(PDO::FETCH_ASSOC);
-        $jap_ships->execute();
-        $result = [];
-
-        foreach ($jap_ships as $key => $jap_ship) {
-            $result[] = $jap_ship;
-        }
-
-        return $result;
     }
 
     public function ai_fire()
     {
         $result = [];
         $target_list = self::ai_list();
-        $rus_force_id = $this->getBattleForces()["rus_force_id"];
+        $player_force_id = $this->getBattleForces()["player_force_id"];
 
         foreach ($target_list as $target) {
             $shipid = $target["id"];
-            $enemy_id = self::max_ship_strength($rus_force_id);
+            $enemy_id = self::max_ship_strength($player_force_id);
 
             if ($shipid) {
                 $cannons = $this->getCannonsByShipId($shipid, $enemy_id);
@@ -336,6 +302,8 @@ class Ships
                     $res2["fire_result_name"] = $fire_result["fire_result_name"];
                     $res2["fire_result_type_name"] = $fire_result["fire_result_type_name"];
                     $res2["fire_result_type"] = $fire_result["fire_result_type"];
+                    $res2["fire_result"] = $fire_result["fire_result"];
+                    $res2["fire_result_side"] = $fire_result["fire_result_side"];
                     self::fire_exec($res2);
                     $result3[] = $res2;
                 }
@@ -344,26 +312,45 @@ class Ships
         return $result3;
     }
 
+    public function ai_list()
+    {
+        $enemy_force_id = implode(",", $this->getBattleForces()["enemy_force_id"]);
+
+        $connection = $this->db;
+        $query_enemy = "SELECT id FROM ships WHERE force_id IN ($enemy_force_id)";
+        $enemy_ships = $connection->prepare($query_enemy);
+        $enemy_ships->setFetchMode(PDO::FETCH_ASSOC);
+        $enemy_ships->execute();
+        $result = [];
+
+        foreach ($enemy_ships as $key => $enemy_ship) {
+            $result[] = $enemy_ship;
+        }
+
+        return $result;
+    }
+
+
+
     public function max_ship_strength($force_id)
     {
-
         $force_id = implode(",", $force_id);
         $connection = $this->db;
-        $query = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour a on a.shipid = s.id  WHERE s.force_id IN ($force_id) AND s.isactive=1 AND s.inaction=1";
+        $query = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour a on a.shipid = s.id  WHERE s.force_id IN ($force_id) AND s.isactive = 1 AND s.inaction = 1";
         $force_ships = $connection->prepare($query);
         $force_ships->setFetchMode(PDO::FETCH_ASSOC);
         $force_ships->execute();
         $result = [];
 
         foreach ($force_ships as $key => $force_ship) {
-            $k_armour=1;
+            $k_armour = 1;
 
             if ($force_ship["armour_type"] == "garvey") {
-                $k_armour=self::GARVEY_ARMOUR;
+                $k_armour = self::GARVEY_ARMOUR;
             }
 
             if($force_ship["armour_type"] == "krupp"){
-                $k_armour=self::KRUPP_ARMOUR;
+                $k_armour = self::KRUPP_ARMOUR;
             }
 
             $force_ship["effective_armour"] = $force_ship["belt"] * $k_armour;
@@ -373,7 +360,7 @@ class Ships
             $result["ship_strength"][$shipid]["strength"] = (int)$force_ship["displacement"] + (int)$force_ship["speed"] * 100 + (int)$force_ship["effective_armour"] * 10;
             $result["ship_strength"][$shipid]["shipid"] = $force_ship["id"];
 
-            $query = "SELECT c.*, s.id FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=:shipid";
+            $query = "SELECT c.*, s.id FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid = :shipid";
             $cannons = $connection->prepare($query);
             $cannons->setFetchMode(PDO::FETCH_ASSOC);
             $cannons->execute(array("shipid" => $shipid));
@@ -383,7 +370,7 @@ class Ships
             }
         }
 
-        $strength_arr=[];
+        $strength_arr = [];
 
         foreach ($result["ship_strength"] as $key => $res)
         {
@@ -406,25 +393,30 @@ class Ships
     public function fire_result($item_fire)
     {
         $chance_rand = rand(1, 100);
-        $precision = 90;
-        $class = "";
+        $side = ($item_fire["country"] == $this->getSides()["player"]) ? "player" : "enemy";
+        $country_precision = self::RUS_PRECISION;
 
         if ($item_fire["country"] == "russia") {
-            $precision = (100 - self::RUS_PRECISION * ($item_fire["enemy_ship_length"] / 100));
-            $class = "green_text";
-        } else if($item_fire["country"] == "japan") {
-            $precision = (100 - self::JAP_PRECISION *($item_fire["enemy_ship_length"] / 100));
-            $class = "red_text";
+            $country_precision = self::RUS_PRECISION;
+        } else if ($item_fire["country"] == "japan") {
+            $country_precision = self::JAP_PRECISION ;
         }
 
+        $precision = (100 - $country_precision * ($item_fire["enemy_ship_length"] / 100));
+
         if ($chance_rand > $precision) {
-            $result["fire_result_name"] ="<span class='$class'>Попадание</span>";
             $fire_type = self::fire_type();
+            $result["fire_result"] = true;
+            $result["fire_result_name"] = "Попадание";
+            $result["fire_result_side"] = $side;
             $result["fire_result_type_name"] = $fire_type["fire_result_type_name"];
             $result["fire_result_type"] = $fire_type["fire_result_type"];
         } else {
-            $result["fire_result_name"] ="Промах";
-            $result["fire_result_type_name"] = "|";
+            $result["fire_result"] = false;
+            $result["fire_result_name"] = "Промах";
+            $result["fire_result_side"] = $side;
+            $result["fire_result_type_name"] = "";
+            $result["fire_result_type"] = "";
         }
 
         return $result;
@@ -466,7 +458,7 @@ class Ships
            $crew_level = ceil($fire_level / 2);
            $connection = $this->db;
 
-           $query = "UPDATE ships SET fires=fires+:fire_level, crew=crew-:crew_level WHERE id=:shipid;";
+           $query = "UPDATE ships SET fires = fires + :fire_level, crew = crew - :crew_level WHERE id = :shipid;";
            $result_query = $connection->prepare($query);
            $result_query->execute(array("fire_level" => $fire_level, "shipid" => $shipid, "crew_level" => $crew_level));
 
@@ -502,30 +494,22 @@ class Ships
         }
     }
 
-    public function enemyList($shipid, $enemy, $force_id_array)
+    public function enemyList($enemy, $force_id_array)
     {
         $connection = $this->db;
         $force_id_string = implode(",", $force_id_array);
-        $query = "SELECT * FROM ships WHERE country=:enemy AND force_id IN ($force_id_string)";
+        $query = "SELECT * FROM ships WHERE country = :enemy AND force_id IN ($force_id_string)";
         $ships = $connection->prepare($query);
         $ships->setFetchMode(PDO::FETCH_ASSOC);
         $ships->execute(array("enemy" => $enemy));
-
-        $result = "Цель:&nbsp;<select id=$shipid class='target_list' name='enemy_list' onchange='setTarget(this.options[this.selectedIndex].value, $shipid); buttonEnabled()'>";
-        $result .="<option value='' selected disabled>"."Выберите цель..."."</option>";
-
-        foreach ($ships as $key => $ship) {
-            $result .="<option id=" . $shipid . "_" . $ship['id'] . " value=" . $ship['id'] . ">" . $ship["name"] . "</option>";
-        }
-
-        $result .= "</select>";
+        $result = $ships->fetchAll(PDO::FETCH_ASSOC);
 
         return $result;
     }
 
     public function getShipById($shipid) {
         $connection = $this->db;
-        $query = "SELECT s.*, a.* FROM ships s INNER JOIN s_armour a ON s.id=a.shipid WHERE s.id=:shipid";
+        $query = "SELECT s.*, a.* FROM ships s INNER JOIN s_armour a ON s.id = a.shipid WHERE s.id = :shipid";
         $result = $connection->prepare($query);
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $result->execute(array("shipid" => $shipid));
@@ -562,7 +546,7 @@ class Ships
         $k_fires = (100 - $ship_fires) / 100;
 
         $connection = $this->db;
-        $query = "SELECT c.*, s.name, s.country FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid=:shipid";
+        $query = "SELECT c.*, s.name, s.country FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid = :shipid";
         $cannons = $connection->prepare($query);
         $cannons->setFetchMode(PDO::FETCH_ASSOC);
         $cannons->execute(array("shipid" => $shipid));
@@ -578,66 +562,6 @@ class Ships
                $result[$key]["enemy_ship_length"] = $this->getShipById($enemy_id)["length"];
            }
         }
-
-        return $result;
-    }
-
-    public function fires_line($shipid)
-    {
-        $ship = $this->getShipById($shipid);
-        $level = ceil($ship["fires"] * 5 / 100);
-        $result ="<p class='p_line' title='Пожары'>";
-
-        for ($i = 1; $i <= 5; $i++) {
-
-            if($i <= $level){
-                $result .= "<span class='oval red'></span>";
-            } else {
-                $result .= "<span class='oval grey'></span>";
-            }
-        }
-
-        $result .="</p>";
-
-        return $result;
-    }
-
-    public function flooding_line($shipid)
-    {
-        $ship = $this->getShipById($shipid);
-        $level = ceil($ship["flooding"] * 5 / 100);
-        $result ="<p class='p_line' title='Затопления'>";
-
-        for ($i = 1; $i <= 5; $i++) {
-
-            if ($i <= $level) {
-                $result .= "<span class='oval blue'></span>";
-            } else {
-                $result .= "<span class='oval grey'></span>";
-            }
-        }
-
-        $result .="</p>";
-
-        return $result;
-    }
-
-    public function crew_line($shipid)
-    {
-        $ship = $this->getShipById($shipid);
-        $level = ceil($ship["crew"] * 5 / 100);
-        $result ="<p class='p_line' title='Экипаж'>";
-
-        for ($i = 1; $i <= 5; $i++) {
-
-            if($i <= $level){
-                $result .= "<span class='oval green'></span>";
-            } else {
-                $result .= "<span class='oval grey'></span>";
-            }
-        }
-
-        $result .="</p>";
 
         return $result;
     }

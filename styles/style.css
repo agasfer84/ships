@@ -34,11 +34,11 @@ html, body{background-color: rgb(249,249,249);color:#000000;}
 #log_frame p{font-size:80%;}
 
 .inline {display:inline-block;}
-.columns{width:25%; margin:auto; padding:30px;min-height:300px;vertical-align: top;}
-#battle_frame{background-color: #CCFFFF;}
-#rus_column{}
+.columns {width:25%; margin:auto; padding:30px;min-height:300px;vertical-align: top;}
+#battle_frame {background-color: #CCFFFF;}
+#player_column {}
 
-#jap_column{text-align:right;}
+#enemy_column{text-align:right;}
 
 ul{list-style-type:none;}
 

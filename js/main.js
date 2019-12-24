@@ -71,32 +71,84 @@ function shipInit() {
                checkSwitch();
             }
 
-            document.getElementById("rus_ul").innerHTML = "";
-            document.getElementById("jap_ul").innerHTML = "";
-            document.getElementById("min_speed_rus").innerHTML = "Скорость эскадры:&nbsp;" + data.rus_ships_speed + "&nbsp;уз.";
-            document.getElementById("min_speed_jap").innerHTML = "Скорость эскадры:&nbsp;" + data.jap_ships_speed + "&nbsp;уз.";
+            document.getElementById("player_ul").innerHTML = "";
+            document.getElementById("enemy_ul").innerHTML = "";
+            document.getElementById("min_speed_player").innerHTML = "Скорость эскадры:&nbsp;" + data["player_ships_speed"] + "&nbsp;уз.";
+            document.getElementById("min_speed_enemy").innerHTML = "Скорость эскадры:&nbsp;" + data["enemy_ships_speed"] + "&nbsp;уз.";
 
-            var rus_ships = data["rus_ships"];
-            var jap_ships = data["jap_ships"];
+            var playerShips = data["player_ships"];
+            var enemyShips = data["enemy_ships"];
+            var enemyListArray = data["enemy_list"];
 
-            rus_ships.forEach(function(item, i, rus_ships) {
-                var newRusLi = document.createElement('li');
-                //var newRusSelect = document.createElement('li');
-                newRusLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo(" + item.id + ");'><p class='ship_name'>" + item.name + "</p></a><img src='/images/'" + item.image + " />"
-                    + item.fires_line + item.flooding_line + item.crew_line + item.enemy_list + item.exit_button;
-                document.getElementById("rus_ul").appendChild(newRusLi);
+            playerShips.forEach(function(item) {
+                var newPlayerLi = document.createElement('li');
+                var exitButton = (item.exit_button) ? '<button onclick="exitShip(' + item.id + ')">Выход из боя</button>' : '<button disabled="disabled">Выход из боя</button>';
+                var enemyListSelect = enemyList(item.id, enemyListArray);
+
+                newPlayerLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo(" + item.id + ");'><p class='ship_name'>" + item.name + "</p></a><img src='/images/'" + item.image + " />"
+                    + drawLine(item.fires, "fires") + drawLine(item.flooding, "flooding") + drawLine(item.crew, "crew") + enemyListSelect + exitButton;
+                document.getElementById("player_ul").appendChild(newPlayerLi);
             });
 
-            jap_ships.forEach(function(item, i, jap_ships) {
-                var newJapLi = document.createElement('li');
-                newJapLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo(" + item.id + ");'><p class='ship_name'>" + item.name + "</p></a><img src='/images/'" + item.image + " />"
-                    + item.fires_line + item.flooding_line + item.crew_line;
-                document.getElementById("jap_ul").appendChild(newJapLi);
+            enemyShips.forEach(function(item) {
+                var newEnemyLi = document.createElement('li');
+                newEnemyLi.innerHTML = "<a href='javascript:void(0);' onclick='shipInfo(" + item.id + ");'><p class='ship_name'>" + item.name + "</p></a><img src='/images/'" + item.image + " />"
+                    + drawLine(item.fires, "fires") + drawLine(item.flooding, "flooding") + drawLine(item.crew, "crew");
+                document.getElementById("enemy_ul").appendChild(newEnemyLi);
             });
 
             populateTargets();
         }
     );
+}
+
+function drawLine(value, type) {
+    var level = Math.ceil(value * 5 / 100);
+    var title = "";
+    var lineClass = "";
+
+    if (type == 'fires') {
+        title = "Пожары";
+        lineClass = "red";
+    }
+
+    if (type == 'flooding') {
+        title = "Затопления";
+        lineClass = "blue";
+    }
+
+    if (type == 'crew') {
+        title = "Экипаж";
+        lineClass = "green";
+    }
+
+    var line = '<p class="p_line" title=' + title + '>';
+
+    for (var i = 1; i <= 5; i++) {
+
+        if (i <= level) {
+            line += '<span class="oval ' + lineClass + '"></span>';
+        } else {
+            line += '<span class="oval grey"></span>';
+        }
+    }
+
+    line += '</p>';
+
+    return line;
+}
+
+function enemyList(shipId, ships) {
+    var select_open = 'Цель:&nbsp;' + '<select id=' + shipId + ' class="target_list" name="enemy_list" onchange="setTarget(this.options[this.selectedIndex].value,' + shipId + '); buttonEnabled();">';
+    var options = '<option value="" selected disabled>Выберите цель...</option>';
+
+    ships.forEach(function(item) {
+        options += '<option id=' + shipId + '_' + item.id + ' value=' + item.id + '>' + item.name + '</option>';
+    });
+
+    var select_close = '</select>';
+
+    return select_open + options + select_close;
 }
 
 function setTarget(enemy_id, ship_id)
@@ -135,7 +187,18 @@ function fire()
 
             data.forEach(function(item, i, data) {
                 var newP = document.createElement('p');
-                newP.innerHTML = item.name + "&nbsp;стреляет по&nbsp;" + item.enemy_name + "&nbsp;орудие&nbsp;" + item.caliber + '"/' + item.barrel_length + '&nbsp;Результат:&nbsp;' + item.fire_result_name + "-" + item.fire_result_type_name;
+                var fireResultClass = "";
+
+                if (item.fire_result && (item.fire_result_side == 'player')) {
+                    fireResultClass = "green_text";
+                }
+
+                if (item.fire_result && (item.fire_result_side == 'enemy')) {
+                    fireResultClass = "red_text";
+                }
+
+                var fireResultName = '<span class="' + fireResultClass + '">' + item.fire_result_name + '</span>';
+                newP.innerHTML = item.name + "&nbsp;стреляет по&nbsp;" + item.enemy_name + "&nbsp;орудие&nbsp;" + item.caliber + '"/' + item.barrel_length + '&nbsp;Результат:&nbsp;' + fireResultName + "-" + item.fire_result_type_name;
                 log_frame.appendChild(newP);
             });
 

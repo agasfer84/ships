@@ -47,16 +47,16 @@ if ($switch == "battle") {
 ?>
 
 <div id="battle_frame">
-    <div id="rus_column" class="inline columns">
-        <p id="min_speed_rus"></p>
-        <ul id="rus_ul" class="ships_ul">
+    <div id="player_column" class="inline columns">
+        <p id="min_speed_player"></p>
+        <ul id="player_ul" class="ships_ul">
         </ul>
     </div>
     <div id="log_frame" class="inline columns">
     </div>
-    <div id="jap_column" class="inline columns">
-        <p id="min_speed_jap"></p>
-        <ul id="jap_ul" class="ships_ul">
+    <div id="enemy_column" class="inline columns">
+        <p id="min_speed_enemy"></p>
+        <ul id="enemy_ul" class="ships_ul">
         </ul>
     </div>
 </div>
