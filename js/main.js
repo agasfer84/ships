@@ -14,7 +14,6 @@ function promiseRequest(data) {
 
 /*battle interface*/
 function shipInfo(shipid) {
-
     var action = "shipInfo";
     var params = JSON.stringify({});
 
@@ -46,7 +45,6 @@ function shipInfo(shipid) {
 }
 
 function shipInit() {
-
     if (!document.getElementById("battle_frame")) return false;
 
     var action = "shipInit";
@@ -66,7 +64,6 @@ function shipInit() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function(data) {
-
             if (!data || data.length < 1) {
                checkSwitch();
             }
@@ -125,7 +122,6 @@ function drawLine(value, type) {
     var line = '<p class="p_line" title=' + title + '>';
 
     for (var i = 1; i <= 5; i++) {
-
         if (i <= level) {
             line += '<span class="oval ' + lineClass + '"></span>';
         } else {
@@ -158,7 +154,7 @@ function setTarget(enemy_id, ship_id)
         return alert("Выберите цель!");
     }
 
-    target_list[ship_id] = {ship_id : ship_id, enemy_id : enemy_id};
+    target_list[target_list.length] = {ship_id : ship_id, enemy_id : enemy_id};
 
     console.log(target_list);
 }
@@ -178,7 +174,7 @@ function fire()
 {
     //console.log(target_list);
     var action = "fire";
-    var body = JSON.stringify({"target_list" : target_list});
+    var body = JSON.stringify(target_list);
 
     post(url, action, body).then(promiseRequest).then(
         function(data){
@@ -295,7 +291,6 @@ function forcesList() {
 
 
 function shipList() {
-
     if (!document.getElementById("list_frame")) return false;
 
     var action = "shipList";
@@ -471,7 +466,6 @@ function changeForce() {
     post(url, action, body).then(promiseRequest).then( function () {
             shipList();
     });
-
 }
 
 function turn() {

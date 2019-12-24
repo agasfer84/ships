@@ -120,7 +120,7 @@ class Ships
 
         $forces_id = array_merge($player_forces, $enemy_forces);
         $forces_id_string = implode(",", $forces_id);
-        $query_ships = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour a on a.shipid = s.id WHERE s.isactive=1 AND s.inaction=1 AND s.force_id IN ($forces_id_string) 
+        $query_ships = "SELECT s.*, a.* FROM ships s LEFT JOIN armour a on a.shipid = s.id WHERE s.isactive=1 AND s.inaction=1 AND s.force_id IN ($forces_id_string) 
         ORDER BY s.order_id";
         $ships = $connection->prepare($query_ships);
         $ships->setFetchMode(PDO::FETCH_ASSOC);
@@ -131,11 +131,13 @@ class Ships
 
         $ships = $ships->fetchAll(PDO::FETCH_ASSOC);
         $result = [];
+        $temporary_result = [];
+        $ships_speed["enemy_ships"] = [];
+        $ships_speed["player_ships"] = [];
 
-        foreach ($ships as $ship) {
-            $side_name = ($ship["country"] == 'russia') ? "player_ships" : "enemy_ships";
-            //$enemy_name = ($ship["country"] == 'russia') ? "enemy" : "player";
-            $enemy_forces_comparing = ($ship["country"] == $this->getSides()["player"]) ? $enemy_forces : $player_forces;
+        foreach ($ships as $key => $ship) {
+            $side_name = ($ship["country"] == $this->getSides()["player"]) ? "player_ships" : "enemy_ships";
+            $ships_speed[$side_name][] = self::getFactSpeed($ship["speed"], $ship["flooding"]);
 
             if((int)$ship["fires"] > 0) {
                 $repare = 2 * (round((int)$ship["crew"] / 100)) - 1;
@@ -146,24 +148,32 @@ class Ships
                 self::checkDamage($ship["id"]);
             }
 
-            $ship["exit_button"] = self::exitButton($ship, $enemy_forces_comparing);
-            $result[$side_name][] = $ship;
+            $ships[$key] = $ship;
+            $temporary_result[$side_name][] = $ship;
         }
 
-        if (count($result["player_ships"]) < 1 || count($result["enemy_ships"]) < 1) {
+        if (count($temporary_result["player_ships"]) < 1 || count($temporary_result["enemy_ships"]) < 1) {
             return [];
         }
 
-        $result["enemy_ships_speed"] = self::minSpeed($enemy_forces);
-        $result["player_ships_speed"] = self::minSpeed($player_forces);
+        $result["enemy_ships_speed"] = min($ships_speed["enemy_ships"]);
+        $result["player_ships_speed"] = min($ships_speed["player_ships"]);
+
+        foreach ($ships as $ship) {
+            $side_name = ($ship["country"] == $this->getSides()["player"]) ? "player_ships" : "enemy_ships";
+            $enemy_forces_speed = ($side_name == "player_ships") ? $result["enemy_ships_speed"] : $result["player_ships_speed"];
+            $ship["exit_button"] = self::exitButton($ship, $enemy_forces_speed);
+            $result[$side_name][] = $ship;
+        }
+
         $result["enemy_list"] = self::enemyList(self::getSides()["enemy"], $forces_id);
 
         return $result;
     }
 
-    public function exitButton($ship, $enemy_force_id)
+    public function exitButton($ship, $enemy_forces_speed)
     {
-        return ($ship["speed"] > self::minSpeed($enemy_force_id));
+        return ($ship["speed"] >= $enemy_forces_speed);
     }
 
     public function exitShip($shipid)
@@ -173,25 +183,6 @@ class Ships
         $result_query = $connection->prepare($query);
 
         return $result_query->execute(array("shipid" => $shipid));
-    }
-
-    public function minSpeed($force_id)
-    {
-        $result = [];
-        $force_id_string = implode(",", $force_id);
-        $connection = $this->db;
-        $query = "SELECT s.* FROM ships s WHERE s.force_id IN ($force_id_string) AND s.isactive = 1 AND s.inaction = 1 ORDER BY s.order_id";
-        $ships = $connection->prepare($query);
-        $ships->setFetchMode(PDO::FETCH_ASSOC);
-        $ships->execute();
-
-         foreach($ships as $key => $ship){
-                $result[$key] = self::getFactSpeed($ship["speed"], $ship["flooding"]);
-        }
-
-        $min_speed = min($result);
-
-        return $min_speed;
     }
 
     public function checkDamage($shipid)
@@ -330,13 +321,18 @@ class Ships
         return $result;
     }
 
+    public function ship_strength($force_id)
+    {
+
+    }
+
 
 
     public function max_ship_strength($force_id)
     {
         $force_id = implode(",", $force_id);
         $connection = $this->db;
-        $query = "SELECT s.*, a.* FROM ships s LEFT JOIN s_armour a on a.shipid = s.id  WHERE s.force_id IN ($force_id) AND s.isactive = 1 AND s.inaction = 1";
+        $query = "SELECT s.*, a.* FROM ships s LEFT JOIN armour a on a.shipid = s.id  WHERE s.force_id IN ($force_id) AND s.isactive = 1 AND s.inaction = 1";
         $force_ships = $connection->prepare($query);
         $force_ships->setFetchMode(PDO::FETCH_ASSOC);
         $force_ships->execute();
@@ -360,7 +356,7 @@ class Ships
             $result["ship_strength"][$shipid]["strength"] = (int)$force_ship["displacement"] + (int)$force_ship["speed"] * 100 + (int)$force_ship["effective_armour"] * 10;
             $result["ship_strength"][$shipid]["shipid"] = $force_ship["id"];
 
-            $query = "SELECT c.*, s.id FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid = :shipid";
+            $query = "SELECT c.*, s.id FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid = :shipid";
             $cannons = $connection->prepare($query);
             $cannons->setFetchMode(PDO::FETCH_ASSOC);
             $cannons->execute(array("shipid" => $shipid));
@@ -509,7 +505,7 @@ class Ships
 
     public function getShipById($shipid) {
         $connection = $this->db;
-        $query = "SELECT s.*, a.* FROM ships s INNER JOIN s_armour a ON s.id = a.shipid WHERE s.id = :shipid";
+        $query = "SELECT s.*, a.* FROM ships s INNER JOIN armour a ON s.id = a.shipid WHERE s.id = :shipid";
         $result = $connection->prepare($query);
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $result->execute(array("shipid" => $shipid));
@@ -546,7 +542,7 @@ class Ships
         $k_fires = (100 - $ship_fires) / 100;
 
         $connection = $this->db;
-        $query = "SELECT c.*, s.name, s.country FROM s_cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid = :shipid";
+        $query = "SELECT c.*, s.name, s.country FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid = :shipid";
         $cannons = $connection->prepare($query);
         $cannons->setFetchMode(PDO::FETCH_ASSOC);
         $cannons->execute(array("shipid" => $shipid));
@@ -566,14 +562,7 @@ class Ships
         return $result;
     }
 
-//foreach($rus_ships as $rusship)
-//{
 
-//    echo "<pre>";
-//        print_r($ship);
-//    echo "</pre>";
-    //echo $rusship["name"];
-//}
 
 }
 ?>

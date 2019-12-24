@@ -27,7 +27,7 @@ if ($_action == "shipInfo" && $_id) {
 if ($_action == "fire") {
     $target_list = json_decode($_body , false);
     $Ships = new Ships();
-    $fire = $Ships->fire($target_list->target_list);
+    $fire = $Ships->fire($target_list);
     //$result = $fire;
     $enemy_fire = $Ships->ai_fire();
     $result = array_merge($fire,$enemy_fire);
