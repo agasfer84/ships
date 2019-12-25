@@ -101,8 +101,8 @@ if ($_action == "test") {
 $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
 
     $Ships = new Ships();
-    $ships_strength =  $Ships->ships_strength([123]);
-    $result = $Ships->force_strength($ships_strength);
+    $ships_strength =  $Ships->shipsStrength([123]);
+    $result = $Ships->forceStrength($ships_strength);
     //$result =$target_list = $Ships->getAiTargetList();
 //$result = $Ships->fire($target_list);
     echo "<pre>";

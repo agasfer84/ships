@@ -137,7 +137,7 @@ class Ships
 
         foreach ($ships as $key => $ship) {
             $side_name = ($ship["country"] == $this->getSides()["player"]) ? "player_ships" : "enemy_ships";
-            $ships_speed[$side_name][] = self::getFactSpeed($ship["speed"], $ship["flooding"]);
+            $ships_speed[$side_name][] = $this->getFactSpeed($ship["speed"], $ship["flooding"]);
 
             if((int)$ship["fires"] > 0) {
                 $repare = 2 * (round((int)$ship["crew"] / 100)) - 1;
@@ -230,14 +230,14 @@ class Ships
       foreach ($cannons_with_target as $cannon)
       {
         for ($i = 0; $i < $cannon["active_quantity"]; ++$i) {
-            if (self::fire_chance($cannon)) {
-                $fire_result = self::fire_result($cannon);
+            if ($this->fireChance($cannon)) {
+                $fire_result = $this->fireResult($cannon);
                 $cannon["fire_result_name"] = $fire_result["fire_result_name"];
                 $cannon["fire_result_type_name"] = $fire_result["fire_result_type_name"];
                 $cannon["fire_result_type"] = $fire_result["fire_result_type"];
                 $cannon["fire_result"] = $fire_result["fire_result"];
                 $cannon["fire_result_side"] = $fire_result["fire_result_side"];
-                self::fire_exec($cannon);
+                $this->fireExec($cannon);
                 $result[] = $cannon;
             }
         }
@@ -248,10 +248,10 @@ class Ships
 
     public function getAiTargetList()
     {
-        $ai_list = self::ai_list();
+        $ai_list = self::getAiList();
         $player_force_id = $this->getBattleForces()["player_force_id"];
-        $ships_strength = $this->ships_strength($player_force_id);
-        $target_id = self::most_strong_ship($ships_strength);
+        $ships_strength = $this->shipsStrength($player_force_id);
+        $target_id = self::mostStrongShipForAi($ships_strength);
         $result = [];
 
         foreach ($ai_list as $row) {
@@ -262,7 +262,7 @@ class Ships
         return $result;
     }
 
-    public function ai_list()
+    public function getAiList()
     {
         $enemy_force_id = implode(",", $this->getBattleForces()["enemy_force_id"]);
 
@@ -280,7 +280,7 @@ class Ships
         return $result;
     }
 
-    public function ships_strength($force_id)
+    public function shipsStrength($force_id)
     {
         $force_id = implode(",", $force_id);
         $connection = $this->db;
@@ -308,52 +308,51 @@ class Ships
         $result = [];
 
         foreach ($force_ships as $key => $force_ship) {
-            $k_armour = 1;
-
-            if ($force_ship["armour_type"] == "garvey") {
-                $k_armour = self::GARVEY_ARMOUR;
-            }
-
-            if($force_ship["armour_type"] == "krupp"){
-                $k_armour = self::KRUPP_ARMOUR;
-            }
-
-            $force_ship["effective_armour"] = $force_ship["belt"] * $k_armour;
-            $shipid = $force_ship["id"];
-
-            $ships[$shipid]["ship_strength"] = (int)$force_ship["displacement"] + (int)$force_ship["speed"] * 100 + (int)$force_ship["effective_armour"] * 10;
-            $ships[$shipid]["cannons_strength"] += ceil(pow($force_ship["caliber"], 2) * $force_ship["quantity"] * ($force_ship["barrel_length"] / 10));
+            $force_ship["effective_armour"] = $this->getEffectiveArmour($force_ship["belt"], $force_ship["armour_type"]);
+            $ships[$force_ship["id"]]["ship_strength_nominal"] = (int)$force_ship["displacement"] + (int)$force_ship["speed"] * 100 + (int)$force_ship["effective_armour"] * 10;
+            $ships[$force_ship["id"]]["cannons_strength_nominal"] += ceil(pow($force_ship["caliber"], 2) * $force_ship["quantity"] * ($force_ship["barrel_length"] / 10));
+            $ships[$force_ship["id"]]["ship_strength_fact"] = (int)$force_ship["displacement"] + self::getFactSpeed((int)$force_ship["speed"], (int)$force_ship["flooding"]) * 100 + (int)$force_ship["effective_armour"] * 10;
+            $ships[$force_ship["id"]]["cannons_strength_fact"] += ceil(pow($force_ship["caliber"], 2) * self::getFactCannons((int)$force_ship["quantity"], (int)$force_ship["fires"]) * ($force_ship["barrel_length"] / 10));
         }
 
         foreach ($ships as $key => $ship) {
-            $result[] =  array("id" => $key,"value" => $ship["ship_strength"] + $ship["cannons_strength"]);
+            $result[] =  array("id" => $key, "value_nominal" => $ship["ship_strength_nominal"] + $ship["cannons_strength_nominal"], "value_fact" => $ship["ship_strength_fact"] + $ship["cannons_strength_fact"]);
         }
 
         return $result;
     }
 
-    public static function force_strength($ships_strength)
+    public function calculateShipStrength()
     {
-        return array_sum(array_column($ships_strength, "value"));
+
     }
 
-    public static function most_strong_ship($ships_strength)
+    public static function forceStrength($ships_strength)
+    {
+        $nominal = array_sum(array_column($ships_strength, "value_nominal"));
+        $fact = array_sum(array_column($ships_strength, "value_fact"));
+
+        return array("nominal" => $nominal, "fact" => $fact);
+    }
+
+
+    public static function mostStrongShipForAi($ships_strength)
     {
         $max = 0;
 
         foreach ($ships_strength as $ship) {
-            if ($ship["value"] < $max) continue;
+            if ($ship["value_nominal"] < $max) continue;
 
-            $max = $ship["value"];
+            $max = $ship["value_nominal"];
         }
 
-        $key = array_search($max, array_column($ships_strength, "value"));
+        $key = array_search($max, array_column($ships_strength, "value_nominal"));
 
         return $ships_strength[$key]["id"];
     }
 
 
-    public function fire_result($item_fire)
+    public function fireResult($item_fire)
     {
         $chance_rand = rand(1, 100);
         $side = ($item_fire["country"] == $this->getSides()["player"]) ? "player" : "enemy";
@@ -368,7 +367,7 @@ class Ships
         $precision = (100 - $country_precision * ($item_fire["enemy_ship_length"] / 100));
 
         if ($chance_rand > $precision) {
-            $fire_type = self::fire_type();
+            $fire_type = self::fireType();
             $result["fire_result"] = true;
             $result["fire_result_name"] = "Попадание";
             $result["fire_result_side"] = $side;
@@ -385,7 +384,7 @@ class Ships
         return $result;
     }
 
-    public function fire_type()
+    public function fireType()
     {
         $type_rand = rand(1,100);
 
@@ -400,7 +399,7 @@ class Ships
         return $result;
     }
 
-    public function fire_exec($item_fire)
+    public function fireExec($item_fire)
     {
         $shipid = $item_fire["enemy_id"];
         $target_ship = $this->getShipById($shipid);
@@ -443,7 +442,7 @@ class Ships
 
     }
 
-    public function fire_chance($item_fire)
+    public function fireChance($item_fire)
     {
         $caliber_penalty = (2 * (int)$item_fire["caliber"]) / 12;
         $barrel_length_penalty = (50 -(int)$item_fire["barrel_length"]) / 5;
@@ -474,20 +473,8 @@ class Ships
         $result->execute(array("shipid" => $shipid));
         $result = $result->fetch(PDO::FETCH_ASSOC);
 
-        $ship_flooding = $result["flooding"];
-
-        $result["fact_speed"] = self::getFactSpeed($result["speed"], $ship_flooding);
-        $k_armour = 1;
-
-        if ($result["armour_type"] == "garvey") {
-            $k_armour = self::GARVEY_ARMOUR;
-        }
-
-        if($result["armour_type"] == "krupp"){
-            $k_armour = self::KRUPP_ARMOUR;
-        }
-
-        $result["effective_armour"] = round($result["belt"] * $k_armour, 2);
+        $result["fact_speed"] = $this->getFactSpeed($result["speed"], $result["flooding"]);
+        $result["effective_armour"] = $this->getEffectiveArmour($result["belt"], $result["armour_type"]);
 
         return $result;
     }
@@ -502,20 +489,9 @@ class Ships
         $ships = $ships->fetchAll(PDO::FETCH_ASSOC);
         $result = [];
 
-        foreach($ships as $ship) {
-            $ship["fact_speed"] = self::getFactSpeed($ship["speed"], $ship["flooding"]);
-            $k_armour = 1;
-
-            if ($ship["armour_type"] == "garvey") {
-                $k_armour = self::GARVEY_ARMOUR;
-            }
-
-            if($ship["armour_type"] == "krupp"){
-                $k_armour = self::KRUPP_ARMOUR;
-            }
-
-            $ship["effective_armour"] = round($ship["belt"] * $k_armour, 2);
-
+        foreach ($ships as $ship) {
+            $ship["fact_speed"] = $this->getFactSpeed($ship["speed"], $ship["flooding"]);
+            $ship["effective_armour"] = $this->getEffectiveArmour($ship["belt"], $ship["armour_type"]);
             $result[$ship["id"]] = $ship;
         }
 
@@ -526,13 +502,35 @@ class Ships
     {
         $k_flooding = (100 - $ship_flooding) / 100;
         $result = ceil((int)$speed * $k_flooding);
+
         return $result;
+    }
+
+    public function getFactCannons($cannon_quantity, $ship_fires)
+    {
+        $k_fires = (100 - $ship_fires) / 100;
+        $result = ceil((int)$cannon_quantity * $k_fires);
+
+        return $result;
+    }
+
+    public function getEffectiveArmour($belt, $armour_type)
+    {
+        $k_armour = 1;
+
+        if ($armour_type == "garvey") {
+            $k_armour = self::GARVEY_ARMOUR;
+        }
+
+        if($armour_type == "krupp"){
+            $k_armour = self::KRUPP_ARMOUR;
+        }
+
+        return round($belt * $k_armour, 2);
     }
 
     public function getCannonsByShipId($shipid, $enemy) {
         $ship = $this->getShipById($shipid);
-        $ship_fires = $ship["fires"];
-        $k_fires = (100 - $ship_fires) / 100;
 
         $connection = $this->db;
         $query = "SELECT c.*, s.name, s.country FROM cannons c INNER JOIN ships s ON s.id = c.shipid WHERE c.shipid = :shipid";
@@ -543,7 +541,7 @@ class Ships
 
         foreach ($cannons as $key => $cannon) {
            $result[$key] = $cannon;
-           $result[$key]["active_quantity"] = ceil((int)$cannon["quantity"] * $k_fires);
+           $result[$key]["active_quantity"] = $this->getFactCannons((int)$cannon["quantity"], $ship["fires"]);
 
            if ($enemy) {
                $result[$key]["enemy_id"] = $enemy["id"];
