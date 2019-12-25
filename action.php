@@ -28,9 +28,9 @@ if ($_action == "fire") {
     $target_list = json_decode($_body , false);
     $Ships = new Ships();
     $fire = $Ships->fire($target_list);
-    //$result = $fire;
-    $enemy_fire = $Ships->ai_fire();
-    $result = array_merge($fire,$enemy_fire);
+    $ai_target_list = $Ships->getAiTargetList();
+    $enemy_fire = $Ships->fire($ai_target_list);
+    $result = array_merge($fire, $enemy_fire);
 }
 
 if ($_action == "exitShip")
@@ -98,11 +98,19 @@ if ($_action == "checkSwitch") {
 
 if ($_action == "test") {
     //http://localhost:8086/shipinfo.php?shiprequest=test
-//    $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
+$target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
+
     $Ships = new Ships();
-//    $result = $Ships->fire($target_list);
+    $ships_strength =  $Ships->ships_strength([123]);
+    $result = $Ships->force_strength($ships_strength);
+    //$result =$target_list = $Ships->getAiTargetList();
+//$result = $Ships->fire($target_list);
+    echo "<pre>";
+    print_r($result);
+    echo "</pre>";
 //    $result = $Ships->ai_fire();
-    $result = $Ships->initShips();
+    //$result = $Ships->initShips();
+    //$result = $Ships->getCannonsByShipId($shipid = 1, $enemy_id = false);
 
 }
 
