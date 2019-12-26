@@ -134,9 +134,18 @@ class Ships
         $ships_speed["enemy_ships"] = [];
         $ships_speed["player_ships"] = [];
 
+        $enemy_force_strength = $this->forceStrength($enemy_forces);
+        $player_force_strength = $this->forceStrength($player_forces);
+
+        $result["enemy_strength_fact"] = $enemy_force_strength["value_fact"];
+        $result["enemy_strength_nominal"] = $enemy_force_strength["value_nominal"];
+        $result["player_strength_fact"] = $player_force_strength["value_fact"];
+        $result["player_strength_nominal"] = $player_force_strength["value_nominal"];
+
         foreach ($ships as $key => $ship) {
             $side_name = ($ship["country"] == $this->getSides()["player"]) ? "player_ships" : "enemy_ships";
-            $ships_speed[$side_name][] = $this->getFactSpeed($ship["speed"], $ship["flooding"]);
+            $ship["speed"] = $this->getFactSpeed($ship["speed"], $ship["flooding"]);
+            $ships_speed[$side_name][] = $ship["speed"];
 
             if((int)$ship["fires"] > 0) {
                 $repare = 2 * (round((int)$ship["crew"] / 100)) - 1;
@@ -158,24 +167,33 @@ class Ships
         $result["enemy_ships_speed"] = min($ships_speed["enemy_ships"]);
         $result["player_ships_speed"] = min($ships_speed["player_ships"]);
 
-        $enemy_force_strength = $this->forceStrength($enemy_forces);
-        $player_force_strength = $this->forceStrength($player_forces);
-
-        $result["enemy_strength_fact"] = $enemy_force_strength["value_fact"];
-        $result["enemy_strength_nominal"] = $enemy_force_strength["value_nominal"];
-        $result["player_strength_fact"] = $player_force_strength["value_fact"];
-        $result["player_strength_nominal"] = $player_force_strength["value_nominal"];
-
         foreach ($ships as $ship) {
             $side_name = ($ship["country"] == $this->getSides()["player"]) ? "player_ships" : "enemy_ships";
             $enemy_forces_speed = ($side_name == "player_ships") ? $result["enemy_ships_speed"] : $result["player_ships_speed"];
             $ship["exit_button"] = self::exitButton($ship, $enemy_forces_speed);
+
+            if (($result["player_strength_fact"] > 1.5 * $result["enemy_strength_fact"]) && $ship["country"] == $this->getSides()["enemy"]) {
+                $this->exitEnemy($ship, $result["player_ships_speed"]);
+                continue;
+            }
+
             $result[$side_name][] = $ship;
         }
 
-        $result["enemy_list"] = self::enemyList(self::getSides()["enemy"], $forces_id);
+        if (count($result["player_ships"]) < 1 || count($result["enemy_ships"]) < 1) {
+            return [];
+        }
+
+        $result["enemy_list"] = self::enemyList($result["enemy_ships"]);
 
         return $result;
+    }
+
+    public function exitEnemy($ship, $player_forces_speed)
+    {
+        if ($ship["speed"] >= $player_forces_speed) {
+            $this->exitShip($ship["id"]);
+        }
     }
 
     public function exitButton($ship, $enemy_forces_speed)
@@ -211,9 +229,43 @@ class Ships
     public function fireRepare($shipid, $repare)
     {
         $connection = $this->db;
-        $query = "UPDATE ships SET fires = fires - :repare WHERE id = :shipid";
+        $query = "UPDATE ships SET fires = fires - :repare WHERE fires > 0 AND id = :shipid";
         $result_query = $connection->prepare($query);
         $result_query->execute(array("repare" => $repare, "shipid" => $shipid));
+    }
+
+    public function fireRepareForAll()
+    {
+        $connection = $this->db;
+        $query = "UPDATE ships SET fires = 0 WHERE fires > 0 AND isactive = 1";
+        $result_query = $connection->prepare($query);
+        $result_query->execute();
+    }
+
+    public function floodingRepare($shipid, $repare)
+    {
+        $connection = $this->db;
+        $query = "UPDATE ships SET flooding = flooding - :repare WHERE flooding > 0 AND id = :shipid";
+        $result_query = $connection->prepare($query);
+        $result_query->execute(array("repare" => $repare, "shipid" => $shipid));
+    }
+
+    public function floodingRepareForAll($shipid, $repare)
+    {
+        $shipid_in = implode(",", $shipid);
+        $connection = $this->db;
+        $query = "UPDATE ships SET flooding = flooding - :repare WHERE flooding > 0 AND id IN ($shipid_in) AND isactive = 1";
+        $result_query = $connection->prepare($query);
+        $result_query->execute(array("repare" => $repare));
+    }
+
+    public function crewRepareForAll($shipid)
+    {
+        $shipid_in = implode(",", $shipid);
+        $connection = $this->db;
+        $query = "UPDATE ships SET crew = 100 WHERE crew < 100 AND id IN ($shipid_in) AND isactive = 1";
+        $result_query = $connection->prepare($query);
+        $result_query->execute();
     }
 
     public function fire($target_list)
@@ -488,17 +540,9 @@ class Ships
         return ($chance > $rand);
     }
 
-    public function enemyList($enemy, $force_id_array)
+    public function enemyList($enemy_ships)
     {
-        $connection = $this->db;
-        $force_id_string = implode(",", $force_id_array);
-        $query = "SELECT * FROM ships WHERE country = :enemy AND force_id IN ($force_id_string)";
-        $ships = $connection->prepare($query);
-        $ships->setFetchMode(PDO::FETCH_ASSOC);
-        $ships->execute(array("enemy" => $enemy));
-        $result = $ships->fetchAll(PDO::FETCH_ASSOC);
-
-        return $result;
+        return $enemy_ships;
     }
 
     public function getShipById($shipid) {

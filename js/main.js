@@ -239,11 +239,14 @@ function forcesList() {
 
     if (!document.getElementById("list_frame")) return false;
 
-    var forces_frame = document.getElementById("forces_frame");
+    //var forces_frame = document.getElementById("forces_frame");
 
     get(url, action, id, params).then(promiseRequest).then(
         function (data) {
-            forces_frame.innerHTML = "";
+            var all_forces = data["all"];
+            var active_forces = data["active"];
+
+            document.getElementById("forces_frame").innerHTML = "";
             var newUl = document.createElement('ul');
             document.getElementById("forces_frame").appendChild(newUl);
 
@@ -263,15 +266,17 @@ function forcesList() {
                 changeForceButton = document.createElement('button');
                 changeForceButton.setAttribute("onclick", "changeForce()");
                 changeForceButton.setAttribute("id", "changeForce_button");
-                changeForceButton.innerHTML = "Назначить отряд";
+                changeForceButton.innerHTML = "Включить в отряд";
                 list_frame.appendChild(changeForceButton);
             }
 
-            data.forEach(function(force) {
+            active_forces.forEach(function(force) {
                 var newLi = document.createElement('li');
                 newLi.innerHTML = force.force_name + ((force.region_name) ? ' ('+force.region_name+')' : '') + '<input type="checkbox" name="forcesInRegionCheckboxes" onchange="forcesInRegion(this)" value=' + force.id + '>' + '<a href="#" onclick="deleteForce(' + force.id + ')">Удалить</a>';
                 newUl.appendChild(newLi);
+            });
 
+            all_forces.forEach(function(force) {
                 var newOption = document.createElement('option');
                 newOption.innerHTML = force.force_name;
                 newOption.value = force.id;
@@ -281,12 +286,12 @@ function forcesList() {
             var newForceInput = document.createElement('input');
             newForceInput.setAttribute("style", "width: 400px;");
             newForceInput.setAttribute("id", "newForceName");
-            forces_frame.appendChild(newForceInput);
+            document.getElementById("forces_frame").appendChild(newForceInput);
 
             var newForceButton = document.createElement('button');
             newForceButton.innerHTML = "Создать отряд";
             newForceButton.setAttribute("onclick", "createNewForce();");
-            forces_frame.appendChild(newForceButton);
+            document.getElementById("forces_frame").appendChild(newForceButton);
 
             regionsList();
         });
@@ -489,16 +494,16 @@ function checkSwitch() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function (data) {
-            if (!search && (data)) {
+            if (!search && (data.length)) {
                 window.location.href = "/?region_id=" + data.region_id;
             }
 
-            if (data) {
+            if (data.length) {
                 var map_frame = document.getElementById("map_frame");
                 map_frame.innerHTML = '<div style="text-align: center;">' + data.region_name + '</div>';
             }
 
-            if (!data && (search)) {
+            if (!data.length && (search)) {
                 window.location.href = "/";
             }
         });

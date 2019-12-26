@@ -50,7 +50,8 @@ if ($_action == "shipList") {
 
 if ($_action == "forcesList") {
     $Forces = new Forces();
-    $list_forces = $Forces->getForcesList();
+    $list_forces["all"] = $Forces->getForcesList();
+    $list_forces["active"] = $Forces->getActiveForcesList();
     $result = $list_forces;
 }
 
@@ -86,6 +87,11 @@ if ($_action == "sendForcesToRegion") {
 
 if ($_action == "turn") {
     $Forces = new Forces();
+    $Ships = new Ships();
+    $Ships->fireRepareForAll();
+    $ships_in_bases = $Forces->getShipsInBases();
+    $Ships->floodingRepareForAll($ships_in_bases, $repare = 1);
+    $Ships->crewRepareForAll($ships_in_bases);
     $result = $Forces->turn();
 }
 
@@ -104,8 +110,8 @@ if ($_action == "test") {
 $target_list = json_decode('[{"ship_id": 2, "enemy_id": "21"}, {"ship_id": 4, "enemy_id": "22"}]', false);
 
     $Ships = new Ships();
-    $ships_strength =  $Ships->shipStrength(21);
-    $result = $ships_strength;
+    $Forces = new Forces();
+    $result = $Forces->getShipsInBases();
     //$result =$target_list = $Ships->getAiTargetList();
 //$result = $Ships->fire($target_list);
     echo "<pre>";

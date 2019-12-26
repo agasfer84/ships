@@ -5,6 +5,8 @@ require_once($_SERVER['DOCUMENT_ROOT']."/dbconnect.php");
 
 class Forces
 {
+    public static $_russian_bases = [3];
+    public static $_japan_bases = [4];
 
     public function __construct()
     {
@@ -51,7 +53,19 @@ class Forces
     {
         $connection = $this->db;
         $country = $this->getSides()["player"];
-        $query = "SELECT f.*, r.region_name FROM forces f INNER JOIN regions r ON r.id = f.region_id WHERE f.country=:country";
+        $query = "SELECT f.*, r.region_name FROM forces f LEFT JOIN regions r ON r.id = f.region_id WHERE f.country=:country";
+        $forces = $connection->prepare($query);
+        $forces->setFetchMode(PDO::FETCH_ASSOC);
+        $forces->execute(array("country" => $country));
+
+        return $forces->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getActiveForcesList()
+    {
+        $connection = $this->db;
+        $country = $this->getSides()["player"];
+        $query = "SELECT DISTINCT f.*, r.region_name FROM forces f LEFT JOIN regions r ON r.id = f.region_id INNER JOIN ships s ON s.force_id = f.id WHERE f.country=:country";
         $forces = $connection->prepare($query);
         $forces->setFetchMode(PDO::FETCH_ASSOC);
         $forces->execute(array("country" => $country));
@@ -171,7 +185,7 @@ class Forces
     {
         $connection = $this->db;
         $country = $this->getSides()["enemy"];
-        $query = "SELECT * FROM forces WHERE country=:country";
+        $query = "SELECT DISTINCT f.* FROM forces f INNER JOIN ships s ON s.force_id = f.id WHERE f.country=:country AND s.isactive = 1";
         $forces = $connection->prepare($query);
         $forces->setFetchMode(PDO::FETCH_ASSOC);
         $forces->execute(array("country" => $country));
@@ -198,6 +212,32 @@ class Forces
         }
 
         return true;
+    }
+
+    public function getShipsInBases()
+    {
+        $connection = $this->db;
+
+        $sides = ["enemy", "player"];
+        $all_ships = [];
+
+        foreach ($sides as $side) {
+            $country = $this->getSides()[$side];
+            $base_region_id = ($this->getSides()[$side] == 'japan') ? self::$_japan_bases : self::$_russian_bases;
+            $base_region_id_string = implode(",", $base_region_id);
+            $query = "SELECT 
+                    s.id
+                    FROM ships s 
+                    INNER JOIN forces f ON s.force_id = f.id
+                    INNER JOIN regions r ON r.id = f.region_id 
+                    WHERE f.country = :country AND r.id IN ($base_region_id_string)";
+            $ships = $connection->prepare($query);
+            $ships->setFetchMode(PDO::FETCH_ASSOC);
+            $ships->execute(array("country" => $country));
+            $all_ships[$side] = $ships->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return array_merge(array_column($all_ships["enemy"], "id"), array_column($all_ships["player"], "id"));
     }
 
     public function turn()
