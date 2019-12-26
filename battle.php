@@ -5,7 +5,6 @@ require_once($_SERVER['DOCUMENT_ROOT']."/dbconnect.php");
 
 class Ships
 {
-
     const RUS_PRECISION = 7;
     const JAP_PRECISION = 11;
 
@@ -159,6 +158,14 @@ class Ships
         $result["enemy_ships_speed"] = min($ships_speed["enemy_ships"]);
         $result["player_ships_speed"] = min($ships_speed["player_ships"]);
 
+        $enemy_force_strength = $this->forceStrength($enemy_forces);
+        $player_force_strength = $this->forceStrength($player_forces);
+
+        $result["enemy_strength_fact"] = $enemy_force_strength["value_fact"];
+        $result["enemy_strength_nominal"] = $enemy_force_strength["value_nominal"];
+        $result["player_strength_fact"] = $player_force_strength["value_fact"];
+        $result["player_strength_nominal"] = $player_force_strength["value_nominal"];
+
         foreach ($ships as $ship) {
             $side_name = ($ship["country"] == $this->getSides()["player"]) ? "player_ships" : "enemy_ships";
             $enemy_forces_speed = ($side_name == "player_ships") ? $result["enemy_ships_speed"] : $result["player_ships_speed"];
@@ -304,6 +311,39 @@ class Ships
         $force_ships = $connection->prepare($query);
         $force_ships->setFetchMode(PDO::FETCH_ASSOC);
         $force_ships->execute();
+
+        return $this->calculateShipStrength($force_ships);
+    }
+
+    public function shipStrength($ship_id)
+    {
+        $connection = $this->db;
+        $query = "SELECT 
+        c.caliber
+        ,c.barrel_length
+        ,c.quantity
+        ,s.id
+        ,s.displacement
+        ,s.speed
+        ,s.crew
+        ,s.flooding
+        ,s.fires
+        ,a.armour_type
+        ,a.belt  
+        FROM cannons c 
+        LEFT JOIN ships s ON c.shipid = s.id
+        LEFT JOIN armour a ON a.shipid = s.id  
+        WHERE s.id = :ship_id AND s.isactive = 1 AND s.inaction = 1";
+
+        $force_ships = $connection->prepare($query);
+        $force_ships->setFetchMode(PDO::FETCH_ASSOC);
+        $force_ships->execute(array("ship_id" => $ship_id));
+
+        return $this->calculateShipStrength($force_ships)[0];
+    }
+
+    public function calculateShipStrength($force_ships)
+    {
         $ships = [];
         $result = [];
 
@@ -322,17 +362,13 @@ class Ships
         return $result;
     }
 
-    public function calculateShipStrength()
+    public function forceStrength($force_id)
     {
-
-    }
-
-    public static function forceStrength($ships_strength)
-    {
+        $ships_strength = $this->shipsStrength($force_id);
         $nominal = array_sum(array_column($ships_strength, "value_nominal"));
         $fact = array_sum(array_column($ships_strength, "value_fact"));
 
-        return array("nominal" => $nominal, "fact" => $fact);
+        return array("value_nominal" => $nominal, "value_fact" => $fact);
     }
 
 

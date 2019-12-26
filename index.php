@@ -30,6 +30,7 @@ $switch = ($region_id) ? "battle" : "forces";
 <div id="top_frame">
     <div id="shipinfo_block">
         <p><span id="ship_name" style="font-weight:bold;"></span></p>
+        <p><span id="ship_strength"></span></p>
         <p><span id="ship_speed"></span></p>
         <p><span id="ship_crew"></span></p>
         <p><span id="ship_fires"></span></p>
@@ -48,6 +49,7 @@ if ($switch == "battle") {
 
 <div id="battle_frame">
     <div id="player_column" class="inline columns">
+        <p id="strength_player"></p>
         <p id="min_speed_player"></p>
         <ul id="player_ul" class="ships_ul">
         </ul>
@@ -55,6 +57,7 @@ if ($switch == "battle") {
     <div id="log_frame" class="inline columns">
     </div>
     <div id="enemy_column" class="inline columns">
+        <p id="strength_enemy"></p>
         <p id="min_speed_enemy"></p>
         <ul id="enemy_ul" class="ships_ul">
         </ul>

@@ -25,6 +25,7 @@ function shipInfo(shipid) {
             if (data.shipinfo.country == "japan") document.getElementById("shipinfo_block").style.cssFloat = "right";
 
             document.getElementById("ship_name").innerHTML = data.shipinfo.name;
+            document.getElementById("ship_strength").innerHTML = 'Боевая ценность (факт/номинал):&nbsp;' + data.strength_fact + " / " + data.strength_nominal;
             document.getElementById("ship_speed").innerHTML = 'Скорость:&nbsp;' + data.shipinfo.speed + "&nbsp;уз." + "&nbsp;(" + "фактическая:&nbsp;" + data.shipinfo.fact_speed + "&nbsp;уз." + ")";
             document.getElementById("ship_crew").innerHTML = 'Экипаж:&nbsp;' + data.shipinfo.crew + '%';
             document.getElementById("ship_belt").innerHTML = 'Главный пояс:&nbsp;' + data.shipinfo.belt;
@@ -70,6 +71,8 @@ function shipInit() {
 
             document.getElementById("player_ul").innerHTML = "";
             document.getElementById("enemy_ul").innerHTML = "";
+            document.getElementById("strength_player").innerHTML = "Сила отряда (факт/номинал):&nbsp;" + data["player_strength_fact"] + "&nbsp;/&nbsp;" + data["player_strength_nominal"];
+            document.getElementById("strength_enemy").innerHTML = "Сила отряда (факт/номинал):&nbsp;" + data["enemy_strength_fact"] + "&nbsp;/&nbsp;" + data["enemy_strength_nominal"];
             document.getElementById("min_speed_player").innerHTML = "Скорость эскадры:&nbsp;" + data["player_ships_speed"] + "&nbsp;уз.";
             document.getElementById("min_speed_enemy").innerHTML = "Скорость эскадры:&nbsp;" + data["enemy_ships_speed"] + "&nbsp;уз.";
 
