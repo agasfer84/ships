@@ -70,11 +70,8 @@ if ($switch == "battle") {
 else if($switch == "forces") {
 ?>
 
-    <div id="list_frame">
-    </div>
-    <div id="forces_frame">
-    </div>
-
+<div id="list_frame"></div>
+<div id="forces_frame"></div>
 <div id="turn_frame">
     <button id="turn_button" onclick="turn()">Ход</button>
 </div>

@@ -64,12 +64,10 @@ ul{list-style-type:none;}
 .green_text{color: green;}
 
 #list_frame, #forces_frame {
-    display: inline-block;
+    display: block;
     vertical-align:top;
-}
-
-#forces_frame {
-    float: right;
+    margin: auto;
+    text-align:center;
 }
 
 #regionsSelect {
