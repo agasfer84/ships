@@ -130,6 +130,8 @@ class Ships
 
         $ships = $ships->fetchAll(PDO::FETCH_ASSOC);
         $result = [];
+        $result["player_ships"] = [];
+        $result["enemy_ships"] = [];
         $temporary_result = [];
         $ships_speed["enemy_ships"] = [];
         $ships_speed["player_ships"] = [];

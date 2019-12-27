@@ -450,6 +450,7 @@ function sendForcesToRegion()
     //console.log(region_id);
 
     post(url, action, body).then(promiseRequest).then( function () {
+        forcesToRegion = [];
         forcesList();
         regionsList();
     });
@@ -472,6 +473,7 @@ function changeForce() {
     if (shipsToForce.length < 1) return false;
 
     post(url, action, body).then(promiseRequest).then( function () {
+            shipsToForce = [];
             shipList();
     });
 }
@@ -494,16 +496,16 @@ function checkSwitch() {
 
     get(url, action, id, params).then(promiseRequest).then(
         function (data) {
-            if (!search && (data.length)) {
+            if (!search && (data)) {
                 window.location.href = "/?region_id=" + data.region_id;
             }
 
-            if (data.length) {
+            if (data) {
                 var map_frame = document.getElementById("map_frame");
                 map_frame.innerHTML = '<div style="text-align: center;">' + data.region_name + '</div>';
             }
 
-            if (!data.length && (search)) {
+            if (!data && (search)) {
                 window.location.href = "/";
             }
         });

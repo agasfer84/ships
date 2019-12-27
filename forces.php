@@ -185,7 +185,9 @@ class Forces
     {
         $connection = $this->db;
         $country = $this->getSides()["enemy"];
-        $query = "SELECT DISTINCT f.* FROM forces f INNER JOIN ships s ON s.force_id = f.id WHERE f.country=:country AND s.isactive = 1";
+        $query = "SELECT DISTINCT f.*, ss.crew, ss.flooding FROM forces f INNER JOIN ships s ON s.force_id = f.id 
+LEFT JOIN (SELECT * FROM ships WHERE isactive = 1 AND (crew < 100 OR flooding > 0)) ss ON ss.force_id = f.id
+WHERE f.country=:country AND s.isactive = 1";
         $forces = $connection->prepare($query);
         $forces->setFetchMode(PDO::FETCH_ASSOC);
         $forces->execute(array("country" => $country));
@@ -203,10 +205,17 @@ class Forces
         foreach ($forces as $force) {
             $random_region_key = array_rand($regions);
             $random_region_id = $regions[$random_region_key]["id"];
+            $base_regions = ($force["country"] == 'japan') ? self::$_japan_bases : self::$_russian_bases;
+            $random_base_key = array_rand($base_regions);
+            $random_base_id = $base_regions [$random_base_key];
+
+            if (($force["crew"] && $force["crew"] < 100) || ($force["flooding"] && $force["flooding"] > 0)) {
+                $random_region_id = $random_base_id;
+            }
 
             $connection = $this->db;
             $query = "UPDATE forces SET region_id = :region_id WHERE id = :force_id;
-            UPDATE ships SET inaction = 1 WHERE force_id = :force_id";
+            UPDATE ships SET inaction = 1 WHERE force_id = :force_id AND inaction = 0";
             $result = $connection->prepare($query);
             $result->execute(array("region_id" => $random_region_id, "force_id" => $force["id"]));
         }
