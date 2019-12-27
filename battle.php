@@ -174,8 +174,7 @@ class Ships
             $enemy_forces_speed = ($side_name == "player_ships") ? $result["enemy_ships_speed"] : $result["player_ships_speed"];
             $ship["exit_button"] = self::exitButton($ship, $enemy_forces_speed);
 
-            if (($result["player_strength_fact"] > 1.5 * $result["enemy_strength_fact"]) && $ship["country"] == $this->getSides()["enemy"]) {
-                $this->exitEnemy($ship, $result["player_ships_speed"]);
+            if (($result["player_strength_fact"] > 1.5 * $result["enemy_strength_fact"]) && ($ship["country"] == $this->getSides()["enemy"]) && $this->exitEnemy($ship, $result["player_ships_speed"])) {
                 continue;
             }
 
@@ -195,6 +194,8 @@ class Ships
     {
         if ($ship["speed"] >= $player_forces_speed) {
             $this->exitShip($ship["id"]);
+
+            return true;
         }
     }
 
