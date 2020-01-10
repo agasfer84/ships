@@ -92,6 +92,7 @@ if ($_action == "turn") {
     $ships_in_bases = $Forces->getShipsInBases();
     $Ships->floodingRepareForAll($ships_in_bases, $repare = 1);
     $Ships->crewRepareForAll($ships_in_bases);
+    $Ships->setActionForAll();
     $result = $Forces->turn();
 }
 

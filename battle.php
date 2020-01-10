@@ -271,6 +271,14 @@ class Ships
         $result_query->execute();
     }
 
+    public function setActionForAll()
+    {
+        $connection = $this->db;
+        $query = "UPDATE ships SET inaction = 1 WHERE inaction = 0 AND isactive = 1";
+        $result_query = $connection->prepare($query);
+        $result_query->execute();
+    }
+
     public function fire($target_list)
     {
       $cannons_with_target = [];
