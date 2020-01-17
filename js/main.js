@@ -79,6 +79,13 @@ function shipInit() {
             var playerShips = data["player_ships"];
             var enemyShips = data["enemy_ships"];
             var enemyListArray = data["enemy_list"];
+            var messages = data["messages"];
+
+            messages.forEach(function(item) {
+                var newP = document.createElement('p');
+                newP.innerHTML = item;
+                document.getElementById("log_frame").appendChild(newP);
+            });
 
             playerShips.forEach(function(item) {
                 var newPlayerLi = document.createElement('li');

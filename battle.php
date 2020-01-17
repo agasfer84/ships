@@ -132,6 +132,7 @@ class Ships
         $result = [];
         $result["player_ships"] = [];
         $result["enemy_ships"] = [];
+        $result["messages"] = [];
         $temporary_result = [];
         $ships_speed["enemy_ships"] = [];
         $ships_speed["player_ships"] = [];
@@ -156,6 +157,7 @@ class Ships
 
             if(((int)$ship["fires"] >= 100) || ((int)$ship["flooding"] >= 100)) {
                 self::checkDamage($ship["id"]);
+                $result["messages"][] = $ship["name"]. " тонет!";
             }
 
             $ships[$key] = $ship;
@@ -175,6 +177,12 @@ class Ships
             $ship["exit_button"] = self::exitButton($ship, $enemy_forces_speed);
 
             if (($result["player_strength_fact"] > 1.5 * $result["enemy_strength_fact"]) && ($ship["country"] == $this->getSides()["enemy"]) && $this->exitEnemy($ship, $result["player_ships_speed"])) {
+                $result["messages"][] = $ship["name"]. " выходит из боя";
+                continue;
+            }
+
+            if (((int)$ship["fires"] > 50 || (int)$ship["flooding"] > 50) && ($ship["country"] == $this->getSides()["enemy"]) && $this->exitEnemy($ship, $result["player_ships_speed"])) {
+                $result["messages"][] = $ship["name"]. " выходит из боя";
                 continue;
             }
 
@@ -549,6 +557,19 @@ class Ships
         $chance = 10 / ($barrel_length_penalty * $caliber_penalty);
 
         return ($chance > $rand);
+    }
+
+    public function detonationChance($fire_level)
+    {
+        $rand = rand(1, 1000);
+        $chance = (($fire_level / 100) + 1) * $rand;
+
+        return ($chance > 999);
+    }
+
+    public function detonationExec($shipid)
+    {
+
     }
 
     public function enemyList($enemy_ships)
