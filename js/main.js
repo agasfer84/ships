@@ -164,7 +164,16 @@ function setTarget(enemy_id, ship_id)
         return alert("Выберите цель!");
     }
 
-    target_list[target_list.length] = {ship_id : ship_id, enemy_id : enemy_id};
+    const target = {ship_id : ship_id, enemy_id : enemy_id};
+    var existIndex = target_list.findIndex(function(val){
+        return val.ship_id == ship_id;
+    });
+
+    if (existIndex === -1) {
+        target_list[target_list.length] = target;
+    } else {
+        target_list[existIndex] = target;
+    }
 
     console.log(target_list);
 }

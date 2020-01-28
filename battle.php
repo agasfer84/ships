@@ -151,8 +151,20 @@ class Ships
             $ships_speed[$side_name][] = $ship["speed"];
 
             if((int)$ship["fires"] > 0) {
-                $repare = 2 * (round((int)$ship["crew"] / 100)) - 1;
-                self::fireRepare($ship["id"], $repare);
+                if ($this->detonationChance($ship["fires"])) {
+                    $this->detonationExec($ship["id"]);
+                    $result["messages"][] = $ship["name"]. " взорвался!";
+                } else {
+                    $repare = 2 * (round((int)$ship["crew"] / 100)) - 1;
+                    self::fireRepare($ship["id"], $repare);
+                }
+            }
+
+            if((int)$ship["flooding"] > 0) {
+                if ($this->rolloverChance($ship["fires"])) {
+                    $this->rolloverExec($ship["id"]);
+                    $result["messages"][] = $ship["name"]. " перевернулся!";
+                }
             }
 
             if(((int)$ship["fires"] >= 100) || ((int)$ship["flooding"] >= 100)) {
@@ -285,43 +297,6 @@ class Ships
         $query = "UPDATE ships SET inaction = 1 WHERE inaction = 0 AND isactive = 1";
         $result_query = $connection->prepare($query);
         $result_query->execute();
-    }
-
-    public function fire($target_list)
-    {
-      $cannons_with_target = [];
-      $enemy_id_array = array_column($target_list, 'enemy_id');
-      $enemies = $this->getShipsById($enemy_id_array);
-
-      foreach ($target_list as $target) {
-          $shipid = $target->ship_id;
-          $enemy = $enemies[$target->enemy_id];
-
-          if ($shipid) {
-              $cannons =  $this->getCannonsByShipId($shipid, $enemy);
-              $cannons_with_target = array_merge($cannons_with_target, $cannons);
-          }
-      }
-
-      $result = [];
-
-      foreach ($cannons_with_target as $cannon)
-      {
-        for ($i = 0; $i < $cannon["active_quantity"]; ++$i) {
-            if ($this->fireChance($cannon)) {
-                $fire_result = $this->fireResult($cannon);
-                $cannon["fire_result_name"] = $fire_result["fire_result_name"];
-                $cannon["fire_result_type_name"] = $fire_result["fire_result_type_name"];
-                $cannon["fire_result_type"] = $fire_result["fire_result_type"];
-                $cannon["fire_result"] = $fire_result["fire_result"];
-                $cannon["fire_result_side"] = $fire_result["fire_result_side"];
-                $this->fireExec($cannon);
-                $result[] = $cannon;
-            }
-        }
-    }
-
-      return $result;
     }
 
     public function getAiTargetList()
@@ -458,6 +433,43 @@ class Ships
         return $ships_strength[$key]["id"];
     }
 
+    public function fire($target_list)
+    {
+        $cannons_with_target = [];
+        $enemy_id_array = array_column($target_list, 'enemy_id');
+        $enemies = $this->getShipsById($enemy_id_array);
+
+        foreach ($target_list as $target) {
+            $shipid = $target->ship_id;
+            $enemy = $enemies[$target->enemy_id];
+
+            if ($shipid) {
+                $cannons =  $this->getCannonsByShipId($shipid, $enemy);
+                $cannons_with_target = array_merge($cannons_with_target, $cannons);
+            }
+        }
+
+        $result = [];
+
+        foreach ($cannons_with_target as $cannon)
+        {
+            for ($i = 0; $i < $cannon["active_quantity"]; ++$i) {
+                if ($this->fireChance($cannon)) {
+                    $fire_result = $this->fireResult($cannon);
+                    $cannon["fire_result_name"] = $fire_result["fire_result_name"];
+                    $cannon["fire_result_type_name"] = $fire_result["fire_result_type_name"];
+                    $cannon["fire_result_type"] = $fire_result["fire_result_type"];
+                    $cannon["fire_result"] = $fire_result["fire_result"];
+                    $cannon["fire_result_side"] = $fire_result["fire_result_side"];
+                    $this->fireExec($cannon);
+                    $result[] = $cannon;
+                }
+            }
+        }
+
+        return $result;
+    }
+
 
     public function fireResult($item_fire)
     {
@@ -530,7 +542,6 @@ class Ships
            $query = "UPDATE ships SET fires = fires + :fire_level, crew = crew - :crew_level WHERE id = :shipid;";
            $result_query = $connection->prepare($query);
            $result_query->execute(array("fire_level" => $fire_level, "shipid" => $shipid, "crew_level" => $crew_level));
-
          }
 
         if ($item_fire["fire_result_type"] == "belt")
@@ -539,6 +550,8 @@ class Ships
 
             if ($item_fire["caliber"] * self::INCHES_TO_MM > $target_ship["effective_armour"]) {
                 $flooding_level = ceil(pow(($item_fire["caliber"] * self::INCHES_TO_MM * $piercing), 2) / $target_ship["displacement"]);
+
+
             }
 
             $connection = $this->db;
@@ -567,9 +580,28 @@ class Ships
         return ($chance > 999);
     }
 
+    public function rolloverChance($flooding_level)
+    {
+        $rand = rand(1, 100);
+        $chance = (($flooding_level / 100) + 1) * $rand;
+
+        return ($chance > 99);
+    }
+
     public function detonationExec($shipid)
     {
+        $connection = $this->db;
+        $query = "UPDATE ships SET isactive = 0 WHERE id = :shipid";
+        $result_query = $connection->prepare($query);
+        $result_query->execute(array("shipid" => $shipid));
+    }
 
+    public function rolloverExec($shipid)
+    {
+        $connection = $this->db;
+        $query = "UPDATE ships SET isactive = 0 WHERE id = :shipid";
+        $result_query = $connection->prepare($query);
+        $result_query->execute(array("shipid" => $shipid));
     }
 
     public function enemyList($enemy_ships)
