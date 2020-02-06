@@ -433,7 +433,7 @@ class Ships
         return $ships_strength[$key]["id"];
     }
 
-    public function fire($target_list)
+    public function shot($target_list)
     {
         $cannons_with_target = [];
         $enemy_id_array = array_column($target_list, 'enemy_id');
@@ -454,14 +454,23 @@ class Ships
         foreach ($cannons_with_target as $cannon)
         {
             for ($i = 0; $i < $cannon["active_quantity"]; ++$i) {
-                if ($this->fireChance($cannon)) {
-                    $fire_result = $this->fireResult($cannon);
-                    $cannon["fire_result_name"] = $fire_result["fire_result_name"];
-                    $cannon["fire_result_type_name"] = $fire_result["fire_result_type_name"];
-                    $cannon["fire_result_type"] = $fire_result["fire_result_type"];
-                    $cannon["fire_result"] = $fire_result["fire_result"];
-                    $cannon["fire_result_side"] = $fire_result["fire_result_side"];
-                    $this->fireExec($cannon);
+                if ($this->shotChance($cannon)) {
+                    $shot_result = $this->shotResult($cannon);
+                    $this->shotExec($cannon["enemy_id"], $shot_result["shot_result_type"], $shot_result["shot_result_level"]);
+
+                    if ($shot_result["shot_result_type"] == 'belt' && $shot_result["shot_result_level"] && $this->detonationChance($fire_level = 0)) {
+                        $this->detonationExec($cannon["enemy_id"]);
+                        $shot_result["shot_result_message"] .= " " . $cannon["enemy_name"] . " взорвался!";
+                    }
+                    
+                    $cannon["shot_result_name"] = $shot_result["shot_result_name"];
+                    $cannon["shot_result_type_name"] = $shot_result["shot_result_type_name"];
+                    $cannon["shot_result_type"] = $shot_result["shot_result_type"];
+                    $cannon["shot_result_level"] = $shot_result["shot_result_level"];
+                    $cannon["shot_result"] = $shot_result["shot_result"];
+                    $cannon["shot_result_side"] = $shot_result["shot_result_side"];
+                    $cannon["shot_result_message"] = $shot_result["shot_result_message"];
+
                     $result[] = $cannon;
                 }
             }
@@ -471,98 +480,124 @@ class Ships
     }
 
 
-    public function fireResult($item_fire)
+    public function shotResult($cannon)
     {
         $chance_rand = rand(1, 100);
-        $side = ($item_fire["country"] == $this->getSides()["player"]) ? "player" : "enemy";
+        $side = ($cannon["country"] == $this->getSides()["player"]) ? "player" : "enemy";
         $country_precision = self::RUS_PRECISION;
 
-        if ($item_fire["country"] == "russia") {
+        if ($cannon["country"] == "russia") {
             $country_precision = self::RUS_PRECISION;
-        } else if ($item_fire["country"] == "japan") {
+        } else if ($cannon["country"] == "japan") {
             $country_precision = self::JAP_PRECISION ;
         }
 
-        $precision = (100 - $country_precision * ($item_fire["enemy_ship_length"] / 100));
+        $precision = (100 - $country_precision * ($cannon["enemy_ship_length"] / 100));
+        $message = "";
 
         if ($chance_rand > $precision) {
-            $fire_type = self::fireType();
-            $result["fire_result"] = true;
-            $result["fire_result_name"] = "Попадание";
-            $result["fire_result_side"] = $side;
-            $result["fire_result_type_name"] = $fire_type["fire_result_type_name"];
-            $result["fire_result_type"] = $fire_type["fire_result_type"];
+            $hit_type = self::hitType();
+            $target_ship = $this->getShipById($cannon["enemy_id"]);
+            $level = ($hit_type["shot_result_type"] == "superstructure") ? $this->fireChance($cannon, $target_ship) : $this->piercingChance($cannon, $target_ship);
+            $result["shot_result"] = true;
+            $result["shot_result_name"] = "Попадание";
+            $result["shot_result_side"] = $side;
+            $result["shot_result_type_name"] = $hit_type["shot_result_type_name"];
+            $result["shot_result_type"] = $hit_type["shot_result_type"];
+            $result["shot_result_level"] = $level;
+
+            if ($hit_type["shot_result_type"] == "belt") {
+                $message = ($level) ? "Пробитие" : "Не пробил";
+            }
+
+            if ($hit_type["shot_result_type"] == "superstructure") {
+                $message = ($level) ? "Пожар" : "";
+            }
+
+            $result["shot_result_message"] = $message;
         } else {
-            $result["fire_result"] = false;
-            $result["fire_result_name"] = "Промах";
-            $result["fire_result_side"] = $side;
-            $result["fire_result_type_name"] = "";
-            $result["fire_result_type"] = "";
+            $result["shot_result"] = false;
+            $result["shot_result_name"] = "Промах";
+            $result["shot_result_side"] = $side;
+            $result["shot_result_type_name"] = "";
+            $result["shot_result_type"] = "";
+            $result["shot_result_level"] = 0;
+            $result["shot_result_message"] = $message;
         }
 
         return $result;
     }
 
-    public function fireType()
+    public static function hitType()
     {
         $type_rand = rand(1,100);
 
         if($type_rand < self::BELT_CHANCE){
-            $result["fire_result_type_name"] = "Бортовая броня";
-            $result["fire_result_type"] = "belt";
+            $result["shot_result_type_name"] = "Бортовая броня";
+            $result["shot_result_type"] = "belt";
         } else {
-            $result["fire_result_type_name"] = "Надстройки";
-            $result["fire_result_type"] = "superstructure";
+            $result["shot_result_type_name"] = "Надстройки";
+            $result["shot_result_type"] = "superstructure";
         }
 
         return $result;
     }
 
-    public function fireExec($item_fire)
+    public function shotExec($shipid, $type, $level)
     {
-        $shipid = $item_fire["enemy_id"];
-        $target_ship = $this->getShipById($shipid);
-        $fugacity = 1;
+        if ($type == "superstructure" && $level)
+         {
+                 $crew_level = ceil($level / 2);
+                 $connection = $this->db;
+                 $query = "UPDATE ships SET fires = fires + :fire_level, crew = crew - :crew_level WHERE id = :shipid;";
+                 $result_query = $connection->prepare($query);
+                 $result_query->execute(array("fire_level" => $level, "shipid" => $shipid, "crew_level" => $crew_level));
+         }
+
+        if ($type == "belt" && $level)
+        {
+                $connection = $this->db;
+                $query = "UPDATE ships SET flooding = flooding + :flooding_level WHERE id = :shipid";
+                $result_query = $connection->prepare($query);
+                $result_query->execute(array("flooding_level" => $level, "shipid" => $shipid));
+        }
+    }
+
+    public function piercingChance($item_fire, $target_ship)
+    {
         $piercing = 1;
 
         if ($item_fire["country"] == "russia") {
-            $fugacity = self::RUS_FUGACITY;
             $piercing = self::RUS_PIERCING;
         } else if ($item_fire["country"] == "japan") {
-            $fugacity = self::JAP_FUGACITY;
             $piercing = self::JAP_PIERCING;
         }
 
-        if ($item_fire["fire_result_type"] == "superstructure")
-         {
-           $fire_level = ceil(($item_fire["caliber"] * self::INCHES_TO_MM * 100 * $fugacity) / $target_ship["displacement"]);
-           $crew_level = ceil($fire_level / 2);
-           $connection = $this->db;
+        $flooding_level = 0;
 
-           $query = "UPDATE ships SET fires = fires + :fire_level, crew = crew - :crew_level WHERE id = :shipid;";
-           $result_query = $connection->prepare($query);
-           $result_query->execute(array("fire_level" => $fire_level, "shipid" => $shipid, "crew_level" => $crew_level));
-         }
-
-        if ($item_fire["fire_result_type"] == "belt")
-        {
-            $flooding_level = 0;
-
-            if ($item_fire["caliber"] * self::INCHES_TO_MM > $target_ship["effective_armour"]) {
-                $flooding_level = ceil(pow(($item_fire["caliber"] * self::INCHES_TO_MM * $piercing), 2) / $target_ship["displacement"]);
-
-
-            }
-
-            $connection = $this->db;
-            $query = "UPDATE ships SET flooding = flooding + :flooding_level WHERE id = :shipid";
-            $result_query = $connection->prepare($query);
-            $result_query->execute(array("flooding_level" => $flooding_level, "shipid" => $shipid));
+        if ($item_fire["caliber"] * self::INCHES_TO_MM > $target_ship["effective_armour"]) {
+            $flooding_level = ceil(pow(($item_fire["caliber"] * self::INCHES_TO_MM * $piercing), 2) / $target_ship["displacement"]);
         }
 
+        return $flooding_level;
     }
 
-    public function fireChance($item_fire)
+    public function fireChance($item_fire, $target_ship)
+    {
+        $fugacity = 1;
+
+        if ($item_fire["country"] == "russia") {
+            $fugacity = self::RUS_FUGACITY;
+        } else if ($item_fire["country"] == "japan") {
+            $fugacity = self::JAP_FUGACITY;
+        }
+
+        $fire_level = ceil(($item_fire["caliber"] * self::INCHES_TO_MM * 100 * $fugacity) / $target_ship["displacement"]);
+
+        return $fire_level;
+    }
+
+    public function shotChance($item_fire)
     {
         $caliber_penalty = (2 * (int)$item_fire["caliber"]) / 12;
         $barrel_length_penalty = (50 -(int)$item_fire["barrel_length"]) / 5;

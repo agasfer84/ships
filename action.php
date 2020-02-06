@@ -27,13 +27,13 @@ if ($_action == "shipInfo" && $_id) {
     );
 }
 
-if ($_action == "fire") {
+if ($_action == "shot") {
     $target_list = json_decode($_body , false);
     $Ships = new Ships();
-    $fire = $Ships->fire($target_list);
+    $player_shot = $Ships->shot($target_list);
     $ai_target_list = $Ships->getAiTargetList();
-    $enemy_fire = $Ships->fire($ai_target_list);
-    $result = array_merge($fire, $enemy_fire);
+    $enemy_shot = $Ships->shot($ai_target_list);
+    $result = array_merge($player_shot, $enemy_shot);
 }
 
 if ($_action == "exitShip")

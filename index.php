@@ -63,7 +63,7 @@ if ($switch == "battle") {
         </ul>
     </div>
 </div>
-<div><button id="fire_button" onclick="fire()" disabled="disabled">Огонь</button></div>
+<div><button id="fire_button" onclick="shot()" disabled="disabled">Огонь</button></div>
 
 <?php
 }

@@ -189,10 +189,10 @@ function populateTargets() {
     });
 }
 
-function fire()
+function shot()
 {
     //console.log(target_list);
-    var action = "fire";
+    var action = "shot";
     var body = JSON.stringify(target_list);
 
     post(url, action, body).then(promiseRequest).then(
@@ -202,18 +202,18 @@ function fire()
 
             data.forEach(function(item, i, data) {
                 var newP = document.createElement('p');
-                var fireResultClass = "";
+                var shotResultClass = "";
 
-                if (item.fire_result && (item.fire_result_side == 'player')) {
-                    fireResultClass = "green_text";
+                if (item.shot_result && (item.shot_result_side == 'player')) {
+                    shotResultClass = "green_text";
                 }
 
-                if (item.fire_result && (item.fire_result_side == 'enemy')) {
-                    fireResultClass = "red_text";
+                if (item.shot_result && (item.shot_result_side == 'enemy')) {
+                    shotResultClass = "red_text";
                 }
 
-                var fireResultName = '<span class="' + fireResultClass + '">' + item.fire_result_name + '</span>';
-                newP.innerHTML = item.name + "&nbsp;стреляет по&nbsp;" + item.enemy_name + "&nbsp;орудие&nbsp;" + item.caliber + '"/' + item.barrel_length + '&nbsp;Результат:&nbsp;' + fireResultName + "-" + item.fire_result_type_name;
+                var shotResultName = '<span class="' + shotResultClass + '">' + item.shot_result_name + '</span>';
+                newP.innerHTML = item.name + "&nbsp;стреляет по&nbsp;" + item.enemy_name + "&nbsp;орудие&nbsp;" + item.caliber + '"/' + item.barrel_length + '&nbsp;Результат:&nbsp;' + shotResultName + "-" + item.shot_result_type_name + " " + item.shot_result_message;
                 log_frame.appendChild(newP);
             });
 
