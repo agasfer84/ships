@@ -213,7 +213,7 @@ function shot()
                 }
 
                 var shotResultName = '<span class="' + shotResultClass + '">' + item.shot_result_name + '</span>';
-                newP.innerHTML = item.name + "&nbsp;стреляет по&nbsp;" + item.enemy_name + "&nbsp;орудие&nbsp;" + item.caliber + '"/' + item.barrel_length + '&nbsp;Результат:&nbsp;' + shotResultName + "-" + item.shot_result_type_name + " " + item.shot_result_message;
+                newP.innerHTML = item.name + "&nbsp;стреляет по&nbsp;" + item["enemy"]["name"] + "&nbsp;орудие&nbsp;" + item.caliber + '"/' + item.barrel_length + '&nbsp;Результат:&nbsp;' + shotResultName + "-" + item.shot_result_type_name + " " + item.shot_result_message;
                 log_frame.appendChild(newP);
             });
 

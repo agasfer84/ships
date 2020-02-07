@@ -17,7 +17,7 @@ if ($_action == "shipInit") {
 if ($_action == "shipInfo" && $_id) {
     $Ships = new Ships();
     $shipinfo = $Ships->getShipById($_id);
-    $cannons = $Ships->getCannonsByShipId($_id, false);
+    $cannons = $Ships->getCannonsByShipId($_id);
     $strength = $Ships->shipStrength($_id);
     $result = array(
         "shipinfo" => $shipinfo,

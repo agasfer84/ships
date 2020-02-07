@@ -217,6 +217,8 @@ class Ships
 
             return true;
         }
+
+        return false;
     }
 
     public function exitButton($ship, $enemy_forces_speed)
@@ -304,10 +306,10 @@ class Ships
         $ai_list = self::getAiList();
         $player_force_id = $this->getBattleForces()["player_force_id"];
         $ships_strength = $this->shipsStrength($player_force_id);
-        $target_id = self::mostStrongShipForAi($ships_strength);
         $result = [];
 
         foreach ($ai_list as $row) {
+            $target_id = $this->getTargetForAI($ships_strength);//self::mostStrongShipForAi($ships_strength);
             $row->enemy_id = $target_id;
             $result[] = $row;
         }
@@ -433,6 +435,26 @@ class Ships
         return $ships_strength[$key]["id"];
     }
 
+    public function getTargetForAI($ships_strength)
+    {
+        $max = 0;
+        $stength_sort_array = array_column($ships_strength, "value_nominal");
+        rsort($stength_sort_array);
+
+        foreach ($stength_sort_array as $stength) {
+            $rand = rand(1, 100);
+            $chance = ($stength / 1000) > $rand;
+
+            if (!$chance) continue;
+
+            $max = $stength;
+        }
+
+        $key = array_search($max, array_column($ships_strength, "value_nominal"));
+
+        return $ships_strength[$key]["id"];
+    }
+
     public function shot($target_list)
     {
         $cannons_with_target = [];
@@ -444,7 +466,12 @@ class Ships
             $enemy = $enemies[$target->enemy_id];
 
             if ($shipid) {
-                $cannons =  $this->getCannonsByShipId($shipid, $enemy);
+                $cannons =  $this->getCannonsByShipId($shipid);
+
+                foreach ($cannons as $key =>$cannon) {
+                    $cannons[$key]["enemy"] = $enemy;
+                }
+
                 $cannons_with_target = array_merge($cannons_with_target, $cannons);
             }
         }
@@ -456,13 +483,13 @@ class Ships
             for ($i = 0; $i < $cannon["active_quantity"]; ++$i) {
                 if ($this->shotChance($cannon)) {
                     $shot_result = $this->shotResult($cannon);
-                    $this->shotExec($cannon["enemy_id"], $shot_result["shot_result_type"], $shot_result["shot_result_level"]);
+                    $this->shotExec($cannon["enemy"]["id"], $shot_result["shot_result_type"], $shot_result["shot_result_level"]);
 
                     if ($shot_result["shot_result_type"] == 'belt' && $shot_result["shot_result_level"] && $this->detonationChance($fire_level = 0)) {
-                        $this->detonationExec($cannon["enemy_id"]);
-                        $shot_result["shot_result_message"] .= " " . $cannon["enemy_name"] . " взорвался!";
+                        $this->detonationExec($cannon["enemy"]["id"]);
+                        $shot_result["shot_result_message"] .= " " . $cannon["enemy"]["name"] . " взорвался!";
                     }
-                    
+
                     $cannon["shot_result_name"] = $shot_result["shot_result_name"];
                     $cannon["shot_result_type_name"] = $shot_result["shot_result_type_name"];
                     $cannon["shot_result_type"] = $shot_result["shot_result_type"];
@@ -479,26 +506,30 @@ class Ships
         return $result;
     }
 
+    public function getCountryPrecisionForShipLength($country, $length)
+    {
+        $country_precision = self::RUS_PRECISION;
+
+        if ($country == "russia") {
+            $country_precision = self::RUS_PRECISION;
+        } else if ($country == "japan") {
+            $country_precision = self::JAP_PRECISION ;
+        }
+
+        return (100 - $country_precision * ($length / 100));
+    }
+
 
     public function shotResult($cannon)
     {
         $chance_rand = rand(1, 100);
         $side = ($cannon["country"] == $this->getSides()["player"]) ? "player" : "enemy";
-        $country_precision = self::RUS_PRECISION;
-
-        if ($cannon["country"] == "russia") {
-            $country_precision = self::RUS_PRECISION;
-        } else if ($cannon["country"] == "japan") {
-            $country_precision = self::JAP_PRECISION ;
-        }
-
-        $precision = (100 - $country_precision * ($cannon["enemy_ship_length"] / 100));
+        $precision = $this->getCountryPrecisionForShipLength($cannon["country"], $cannon["enemy"]["length"]);
         $message = "";
 
         if ($chance_rand > $precision) {
             $hit_type = self::hitType();
-            $target_ship = $this->getShipById($cannon["enemy_id"]);
-            $level = ($hit_type["shot_result_type"] == "superstructure") ? $this->fireChance($cannon, $target_ship) : $this->piercingChance($cannon, $target_ship);
+            $level = ($hit_type["shot_result_type"] == "superstructure") ? $this->fireChance($cannon) : $this->piercingChance($cannon);
             $result["shot_result"] = true;
             $result["shot_result_name"] = "Попадание";
             $result["shot_result_side"] = $side;
@@ -563,44 +594,44 @@ class Ships
         }
     }
 
-    public function piercingChance($item_fire, $target_ship)
+    public function piercingChance($item_shot)
     {
         $piercing = 1;
 
-        if ($item_fire["country"] == "russia") {
+        if ($item_shot["country"] == "russia") {
             $piercing = self::RUS_PIERCING;
-        } else if ($item_fire["country"] == "japan") {
+        } else if ($item_shot["country"] == "japan") {
             $piercing = self::JAP_PIERCING;
         }
 
         $flooding_level = 0;
 
-        if ($item_fire["caliber"] * self::INCHES_TO_MM > $target_ship["effective_armour"]) {
-            $flooding_level = ceil(pow(($item_fire["caliber"] * self::INCHES_TO_MM * $piercing), 2) / $target_ship["displacement"]);
+        if ($item_shot["caliber"] * self::INCHES_TO_MM > $item_shot["enemy"]["effective_armour"]) {
+            $flooding_level = ceil(pow(($item_shot["caliber"] * self::INCHES_TO_MM * $piercing), 2) / $item_shot["enemy"]["displacement"]);
         }
 
         return $flooding_level;
     }
 
-    public function fireChance($item_fire, $target_ship)
+    public function fireChance($item_shot)
     {
         $fugacity = 1;
 
-        if ($item_fire["country"] == "russia") {
+        if ($item_shot["country"] == "russia") {
             $fugacity = self::RUS_FUGACITY;
-        } else if ($item_fire["country"] == "japan") {
+        } else if ($item_shot["country"] == "japan") {
             $fugacity = self::JAP_FUGACITY;
         }
 
-        $fire_level = ceil(($item_fire["caliber"] * self::INCHES_TO_MM * 100 * $fugacity) / $target_ship["displacement"]);
+        $fire_level = ceil(($item_shot["caliber"] * self::INCHES_TO_MM * 100 * $fugacity) / $item_shot["enemy"]["displacement"]);
 
         return $fire_level;
     }
 
-    public function shotChance($item_fire)
+    public function shotChance($item_shot)
     {
-        $caliber_penalty = (2 * (int)$item_fire["caliber"]) / 12;
-        $barrel_length_penalty = (50 -(int)$item_fire["barrel_length"]) / 5;
+        $caliber_penalty = (2 * (int)$item_shot["caliber"]) / 12;
+        $barrel_length_penalty = (50 -(int)$item_shot["barrel_length"]) / 5;
         $rand = rand(1, 10);
         $chance = 10 / ($barrel_length_penalty * $caliber_penalty);
 
@@ -609,18 +640,18 @@ class Ships
 
     public function detonationChance($fire_level)
     {
-        $rand = rand(1, 1000);
-        $chance = (($fire_level / 100) + 1) * $rand;
+        $rand = rand(1, 100);
+        $chance = (pow(($fire_level / 100), 2) + 1) * $rand;
 
-        return ($chance > 999);
+        return ($chance > 100);
     }
 
     public function rolloverChance($flooding_level)
     {
         $rand = rand(1, 100);
-        $chance = (($flooding_level / 100) + 1) * $rand;
+        $chance = (pow(($flooding_level / 100), 2) + 1) * $rand;
 
-        return ($chance > 99);
+        return ($chance > 100);
     }
 
     public function detonationExec($shipid)
@@ -708,7 +739,7 @@ class Ships
         return round($belt * $k_armour, 2);
     }
 
-    public function getCannonsByShipId($shipid, $enemy) {
+    public function getCannonsByShipId($shipid) {
         $ship = $this->getShipById($shipid);
 
         $connection = $this->db;
@@ -721,12 +752,6 @@ class Ships
         foreach ($cannons as $key => $cannon) {
            $result[$key] = $cannon;
            $result[$key]["active_quantity"] = $this->getFactCannons((int)$cannon["quantity"], $ship["fires"]);
-
-           if ($enemy) {
-               $result[$key]["enemy_id"] = $enemy["id"];
-               $result[$key]["enemy_name"] = $enemy["name"];
-               $result[$key]["enemy_ship_length"] = $enemy["length"];
-           }
         }
 
         return $result;
